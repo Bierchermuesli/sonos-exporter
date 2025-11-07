@@ -1,0 +1,17 @@
+services:
+  sonos-exporter:
+    build: .
+    container_name: sonos-exporter
+    restart: unless-stopped
+    ports:
+      - "9814:9814"
+    environment:
+      # Optional: override via env
+      SONOS_IP: "100.88.88.194"
+    command: ["--sonos-ip", "${SONOS_IP}", "--interval", "60"]
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
