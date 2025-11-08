@@ -8,7 +8,9 @@ services:
     environment:
       # Optional: override via env
       SONOS_IP: "100.88.88.194"
-    command: ["--sonos-ip", "${SONOS_IP}", "--interval", "60"]
+    # command: ["--sonos-ip", "${SONOS_IP}", "--interval", "60"]
+    command: ["--sonos-ip", "${SONOS_IP:-100.88.88.194}", "--interval", "60"]
+
     networks:
       - monitoring
 

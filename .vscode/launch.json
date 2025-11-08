@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": "${command:pickArgs}"
+            "args": ["--sonos-ip", "100.88.88.194"]
         }
     ]
 }
