@@ -10,11 +10,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy exporter script
 COPY sonos_exporter.py .
-COPY review_schema.json .
 
 # Run as non-root user for safety
-RUN useradd -m sonos
-USER sonos
+# RUN useradd -m sonos
+# USER sonos
 
 # Expose Prometheus exporter port
 EXPOSE 9814
