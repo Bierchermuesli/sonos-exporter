@@ -20,4 +20,4 @@ EXPOSE 9814
 
 # Command line args can override default Sonos IP
 ENTRYPOINT ["python", "sonos_exporter.py"]
-CMD ["--sonos-ip", "192.168.1.50"]
+CMD ["--sonos-ip", "100.88.88.41"]

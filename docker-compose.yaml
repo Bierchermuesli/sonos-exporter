@@ -5,15 +5,9 @@ services:
     restart: unless-stopped
     ports:
       - "9814:9814"
-    environment:
-      # Optional: override via env
-      SONOS_IP: "100.88.88.194"
-    command: ["--sonos-ip", "${SONOS_IP:-127.0.0.1}", "--interval", "60"]
+    command: ["--sonos-ip", "${SONOS_IP:-100.88.88.41}", "--interval", "60"]
     cap_add:
-      - NET_RAW
-      # - NET_ADMIN
-    # security_opt:
-    #   - apparmor=unconfined      
+      - NET_RAW  
     networks:
       - monitoring
     healthcheck:

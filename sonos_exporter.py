@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 """
+Sonos Prometheus Exporter
+-------------------------
 Features:
- - RX/TX bytes, packets, errors
+ - RX/TX bytes, packets, errors, drops
  - PHY errors, noise floor, channels, WiFi mode, device up
  - Link quality (FROM / TO)
  - OFDM ANI level
  - MAC→Zone mapping for human-readable topology
- - Optional ICMP probe metrics (up/loss/latency) for all Sonos IPs and extra targets
+ - Optional ICMP probe metrics (loss/latency) for all Sonos IPs and extra targets
  - Optional battery metrics when LocalBatteryStatus is present
+ - Threaded scrape + ICMP
+ - Custom HTTP server with:
+     * /metrics        - Prometheus metrics
+     * /health         - healthcheck (for Docker)
+     * /metrics/health - additional health endpoint
+     * /               - simple ok page
 """
 
 import re
@@ -17,9 +25,16 @@ import socket
 import struct
 import select
 import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
 import requests
 import xml.etree.ElementTree as ET
-from prometheus_client import Gauge, start_http_server
+from prometheus_client import (
+    Gauge,
+    REGISTRY,
+    generate_latest,
+    CONTENT_TYPE_LATEST,
+)
 
 
 class SonosExporter:
@@ -41,24 +56,28 @@ class SonosExporter:
         self.zone_ip_map = {}
         self._map_lock = threading.Lock()
 
-        # Gauges start here
+        # --- Core interface counters ---
         self.rx_bytes = Gauge("sonos_rx_bytes", "Received bytes", ["zone", "interface"])
         self.tx_bytes = Gauge("sonos_tx_bytes", "Transmitted bytes", ["zone", "interface"])
         self.rx_packets = Gauge("sonos_rx_packets", "Received packets", ["zone", "interface"])
         self.tx_packets = Gauge("sonos_tx_packets", "Transmitted packets", ["zone", "interface"])
         self.rx_errors = Gauge("sonos_rx_errors", "Receive errors", ["zone", "interface"])
         self.tx_errors = Gauge("sonos_tx_errors", "Transmit errors", ["zone", "interface"])
-        self.rx_errors = Gauge("sonos_rx_dropped", "Receive drops", ["zone", "interface"])
-        self.tx_errors = Gauge("sonos_tx_dropped", "Transmit drops", ["zone", "interface"])        
+        self.rx_dropped = Gauge("sonos_rx_dropped", "Receive drops", ["zone", "interface"])
+        self.tx_dropped = Gauge("sonos_tx_dropped", "Transmit drops", ["zone", "interface"])
+
+        # --- Radio / PHY ---
         self.phy_errors = Gauge("sonos_phy_errors", "PHY errors", ["zone"])
         self.noise_floor = Gauge("sonos_noise_floor_dbm", "Noise floor", ["zone"])
         self.ofdm_ani = Gauge("sonos_ofdm_ani_level", "OFDM ANI", ["zone"])
         self.operating_channel = Gauge("sonos_operating_channel", "Channel", ["zone"])
         self.ieee_channel = Gauge("sonos_ieee_channel", "IEEE channel", ["zone"])
         self.wifi_mode = Gauge("sonos_wifi_mode", "0=SonosNet 1=Station", ["zone"])
-        self.device_up = Gauge("sonos_device_up", "Reachable", ["zone"])
 
-        # Battery metrics
+        # Device up (overridden by ICMP if enabled)
+        self.device_up = Gauge("sonos_device_up", "Reachable (ICMP if enabled)", ["zone"])
+
+        # --- Battery metrics ---
         self.battery_level = Gauge("sonos_battery_level_percent", "Battery %", ["zone"])
         self.battery_info = Gauge(
             "sonos_battery_info",
@@ -66,7 +85,7 @@ class SonosExporter:
             ["zone", "health", "temperature", "power_source"],
         )
 
-        # SonosNet link quality
+        # --- SonosNet link quality ---
         self.link_metric = Gauge(
             "sonos_link_connection",
             "SonosNet links",
@@ -79,12 +98,19 @@ class SonosExporter:
             "sonos_link_quality_to", "TO link quality", ["zone", "peer_zone", "model"]
         )
 
-        # ICMP metrics
-        self.icmp_up = Gauge("icmp_up", "1 if up", ["zone", "ip"])
+        # --- ICMP-related metrics ---
+        # No icmp_up exposed: device_up is driven by ICMP if enabled
         self.icmp_loss = Gauge("icmp_loss", "Loss ratio", ["zone", "ip"])
         self.icmp_latency = Gauge("icmp_latency_ms", "Latency ms", ["zone", "ip"])
+        self.icmp_last_success = Gauge(
+            "sonos_icmp_last_success_timestamp",
+            "Unix timestamp of last successful ICMP response",
+            ["zone", "ip"],
+        )
 
-    # Helper functions
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
     @staticmethod
     def _strip_ns(tag):
         return tag.split("}", 1)[-1] if "}" in tag else tag
@@ -96,7 +122,8 @@ class SonosExporter:
                 if child.text:
                     return child.text.strip()
         return None
-        # ------------------------------------------------------------------
+
+    # ------------------------------------------------------------------
     # Parsers
     # ------------------------------------------------------------------
     def parse_ifconfig(self, text, zone, mac_map):
@@ -118,8 +145,8 @@ class SonosExporter:
             tx_packets = re.search(r"TX packets:(\d+)", b)
             rx_errors = re.search(r"RX packets:\d+ errors:(\d+)", b)
             tx_errors = re.search(r"TX packets:\d+ errors:(\d+)", b)
-            tx_dropped = re.search(r"TX packets:\d+ errors:\d+ dropped:(\d+)", b)
             rx_dropped = re.search(r"RX packets:\d+ errors:\d+ dropped:(\d+)", b)
+            tx_dropped = re.search(r"TX packets:\d+ errors:\d+ dropped:(\d+)", b)
 
             if rx_bytes:
                 self.rx_bytes.labels(zone, iface).set(float(rx_bytes.group(1)))
@@ -133,10 +160,10 @@ class SonosExporter:
                 self.rx_errors.labels(zone, iface).set(float(rx_errors.group(1)))
             if tx_errors:
                 self.tx_errors.labels(zone, iface).set(float(tx_errors.group(1)))
-            if tx_dropped:
-                self.rx_errors.labels(zone, iface).set(float(tx_dropped.group(1)))
             if rx_dropped:
-                self.tx_errors.labels(zone, iface).set(float(rx_dropped.group(1)))
+                self.rx_dropped.labels(zone, iface).set(float(rx_dropped.group(1)))
+            if tx_dropped:
+                self.tx_dropped.labels(zone, iface).set(float(tx_dropped.group(1)))
 
     def parse_proc_status(self, text, zone, mac_map):
         """Extract PHY, channel, noise floor, OFDM ANI, and link quality"""
@@ -198,8 +225,10 @@ class SonosExporter:
             if "Level" in fields:
                 try:
                     self.battery_level.labels(zone).set(float(fields["Level"]))
-                except:
-                    pass
+                except Exception:
+                    self.logger.debug(
+                        "Non-numeric battery level for zone %s: %s", zone, fields["Level"]
+                    )
             self.battery_info.labels(
                 zone,
                 fields.get("Health", "unknown"),
@@ -207,7 +236,7 @@ class SonosExporter:
                 fields.get("PowerSource", "unknown"),
             ).set(1)
 
- # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Scraper
     # ------------------------------------------------------------------
     def scrape_once(self):
@@ -220,11 +249,11 @@ class SonosExporter:
             self.logger.error(f"Failed to fetch {url}: {e}")
             return
 
-        zones, updated = 0, 0
+        zones = 0
         mac_map = {}
         zp_nodes = list(root.findall(".//ZPSupportInfo"))
 
-        # ---- 1st pass: build MAC→zone map ----
+        # 1st pass: build MAC→zone map
         for zp in zp_nodes:
             zone = self._find_text(zp, "ZoneName") or "unknown"
             for cmd in zp.findall(".//Command"):
@@ -238,7 +267,7 @@ class SonosExporter:
                     for mac in re.findall(r"HWaddr\s+([0-9A-F:]{17})", text, re.I):
                         mac_map[mac.upper()] = zone
 
-        # ---- 2nd pass: parse metrics & build zone->ip map ----
+        # 2nd pass: parse metrics & build zone->ip map
         zone_ip_map = {}
         seen_links = set()
         for zp in zp_nodes:
@@ -248,6 +277,7 @@ class SonosExporter:
                 zone_ip_map[zone] = ip_addr
 
             zones += 1
+            # base assumption: HTTP reachability
             self.device_up.labels(zone).set(1.0)
 
             for w in zp.findall(".//Wireless"):
@@ -278,17 +308,21 @@ class SonosExporter:
                 else:
                     seen_links.add(key_pair)
 
-            updated += 1
-
         # Update shared zone->ip map for ICMP thread
         with self._map_lock:
             self.zone_ip_map = zone_ip_map
 
         self.logger.info(
-            f"Scraped {zones} zones, MAC map size={len(mac_map)}, "
-            f"links={len(seen_links)}, zone_ip_map={len(zone_ip_map)}"
+            "Scraped %d zones, MAC map size=%d, links=%d, zone_ip_map=%d",
+            zones,
+            len(mac_map),
+            len(seen_links),
+            len(zone_ip_map),
         )
+
+    # ------------------------------------------------------------------
     # ICMP helpers
+    # ------------------------------------------------------------------
     @staticmethod
     def _icmp_checksum(source: bytes) -> int:
         if len(source) % 2:
@@ -304,7 +338,7 @@ class SonosExporter:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
         except Exception as e:
-            self.logger.error(f"ICMP socket error: {e}")
+            self.logger.error("ICMP socket error: %s", e)
             return None
 
         try:
@@ -324,8 +358,8 @@ class SonosExporter:
                 return None
             recv_packet, addr = sock.recvfrom(1024)
             recv_time = time.time()
-            return (recv_time - send_time) * 1000
-        except:
+            return (recv_time - send_time) * 1000.0
+        except Exception:
             return None
         finally:
             sock.close()
@@ -337,6 +371,7 @@ class SonosExporter:
         for ip in self.extra_icmp_targets:
             targets.append(("custom", ip))
         return targets
+
     def _icmp_loop(self):
         self.logger.info("ICMP thread started")
         seq = 1
@@ -355,18 +390,25 @@ class SonosExporter:
                         rtts.append(rtt)
                     time.sleep(0.2)
 
-                up = 1.0 if received else 0.0
+                up = received > 0
                 loss = (sent - received) / sent
-                latency = sum(rtts) / len(rtts) if rtts else 0
+                latency = sum(rtts) / len(rtts) if rtts else 0.0
 
-                self.icmp_up.labels(zone, ip).set(up)
+                # drive device_up when ICMP enabled (for real Sonos zones)
+                if zone != "custom":
+                    self.device_up.labels(zone).set(1.0 if up else 0.0)
+
                 self.icmp_loss.labels(zone, ip).set(loss)
                 self.icmp_latency.labels(zone, ip).set(latency)
+                if up:
+                    self.icmp_last_success.labels(zone, ip).set(time.time())
 
             sleep_time = max(0, self.icmp_interval - (time.time() - start))
             time.sleep(sleep_time)
 
+    # ------------------------------------------------------------------
     # Threaded scrape
+    # ------------------------------------------------------------------
     def scrape_thread(self):
         self.logger.info("Scrape thread started")
         while True:
@@ -376,17 +418,55 @@ class SonosExporter:
             time.sleep(sleep_time)
 
     def run(self):
+        # Start scrape thread
         threading.Thread(target=self.scrape_thread, daemon=True).start()
+        # Start ICMP thread
         if self.icmp_enabled:
             threading.Thread(target=self._icmp_loop, daemon=True).start()
+        # Main thread idle
         while True:
             time.sleep(10)
 
 
+# ----------------------------------------------------------------------
+# HTTP server with /metrics and /health
+# ----------------------------------------------------------------------
+class MetricsHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path in ("/", "/health", "/metrics/health"):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(b"ok\n")
+        elif self.path.startswith("/metrics"):
+            output = generate_latest(REGISTRY)
+            self.send_response(200)
+            self.send_header("Content-Type", CONTENT_TYPE_LATEST)
+            self.send_header("Content-Length", str(len(output)))
+            self.end_headers()
+            self.wfile.write(output)
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def log_message(self, format, *args):
+        # Avoid noisy default logging; route via logging module instead
+        logging.getLogger("sonos_exporter.http").info(
+            "%s - - %s", self.address_string(), format % args
+        )
+
+
+def start_http_server_with_health(port):
+    server = ThreadingHTTPServer(("", port), MetricsHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server
+
+
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Sonos Prometheus Exporter (threaded)")
 
+    parser = argparse.ArgumentParser(description="Sonos Prometheus Exporter (threaded)")
     parser.add_argument("--sonos-ip", required=True)
     parser.add_argument("--interval", type=int, default=60)
     parser.add_argument("--port", type=int, default=9814)
@@ -415,5 +495,7 @@ if __name__ == "__main__":
         extra_icmp_targets=args.icmp_target,
     )
 
-    start_http_server(args.port)
+    # Start HTTP server with /metrics and /health
+    start_http_server_with_health(args.port)
+
     exporter.run()
