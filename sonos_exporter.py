@@ -42,13 +42,11 @@ class SonosExporter:
         self,
         sonos_ip,
         interval=60,
-        icmp_enabled=True,
         icmp_interval=30,
         extra_icmp_targets=None,
     ):
         self.sonos_ip = sonos_ip
         self.interval = interval
-        self.icmp_enabled = icmp_enabled
         self.icmp_interval = min(icmp_interval, interval) if icmp_interval else interval
         self.extra_icmp_targets = extra_icmp_targets or []
 
@@ -72,10 +70,41 @@ class SonosExporter:
         self.ofdm_ani = Gauge("sonos_ofdm_ani_level", "OFDM ANI", ["zone"])
         self.operating_channel = Gauge("sonos_operating_channel", "Channel", ["zone"])
         self.ieee_channel = Gauge("sonos_ieee_channel", "IEEE channel", ["zone"])
-        self.wifi_mode = Gauge("sonos_wifi_mode", "0=SonosNet 1=Station", ["zone"])
+        self.wifi_mode = Gauge("sonos_wifi_mode", "WifiMode value", ["zone", "mode_string"])
+        self.idle_state = Gauge("sonos_idle_state", "IdleState value", ["zone"])
+        self.busy_state = Gauge("sonos_busy_state", "BusyClient flags", ["zone", "state"])
+
+        # --- Ethernet ---
+        self.enet_link = Gauge("sonos_enet_connected", "Ethernet link state (0=down, 1=up)", ["zone", "port"])
+        self.enet_speed = Gauge("sonos_enet_speed_mbps", "Ethernet speed", ["zone", "port"])
+
+        # --- Advanced Wifi/Radio ---
+        self.ht_channel = Gauge("sonos_ht_channel", "High Throughput (HT) IEEE Channel", ["zone"])
+        self.ht_ap_mode = Gauge("sonos_ht_ap_mode", "HT AP Mode (0=off, 1=on)", ["zone"])
+        self.rf_chains = Gauge("sonos_rf_chains", "RF Chains count", ["zone", "direction"]) # direction=rx|tx
+
+        # --- Bridge / STP ---
+        self.bridge_stp_enabled = Gauge("sonos_bridge_stp_enabled", "Bridge STP enabled", ["zone"])
 
         # Device up (overridden by ICMP if enabled)
         self.device_up = Gauge("sonos_device_up", "Reachable (ICMP if enabled)", ["zone"])
+
+        # --- Device Info ---
+        self.device_info = Gauge(
+            "sonos_device_info",
+            "Device metadata",
+            [
+                "zone",
+                "serial_number",
+                "software_version",
+                "sw_gen",
+                "ip_address",
+                "mac_address",
+                "hardware_version",
+                "series_id",
+                "local_uid",
+            ],
+        )
 
         # --- Battery metrics ---
         self.battery_level = Gauge("sonos_battery_level_percent", "Battery %", ["zone"])
@@ -166,12 +195,31 @@ class SonosExporter:
                 self.tx_dropped.labels(zone, iface).set(float(tx_dropped.group(1)))
 
     def parse_proc_status(self, text, zone, mac_map):
-        """Extract PHY, channel, noise floor, OFDM ANI, and link quality"""
+        """Extract PHY, channel, noise floor, OFDM ANI, link quality, HT info, RF chains"""
         ch = re.search(r"Operating on channel\s+(\d+)", text)
         ieee = re.search(r"IEEE channel:\s*(\d+)", text)
         phy = re.search(r"PHY errors.*?:\s*(\d+)", text)
         noise = [int(n) for n in re.findall(r"Noise Floor:\s*(-?\d+)", text)]
         ofdm = re.search(r"OFDM ANI level:\s*(\d+)", text)
+
+        # HT Channel (multiline check)
+        # Look for HT Channel line, then capture the IEEE channel below it
+        ht_match = re.search(r"HT Channel.*?\n.*?IEEE channel:\s*(\d+)", text, re.DOTALL | re.IGNORECASE)
+        if ht_match:
+             self.ht_channel.labels(zone).set(float(ht_match.group(1)))
+
+        # HT AP Mode
+        ht_ap = re.search(r"HT AP mode:\s*(on|off)", text, re.IGNORECASE)
+        if ht_ap:
+            val = 1 if ht_ap.group(1).lower() == "on" else 0
+            self.ht_ap_mode.labels(zone).set(val)
+
+        # RF Chains
+        # "RF Chains: RX:4 TX:4"
+        rf = re.search(r"RF Chains:\s*RX:(\d+)\s+TX:(\d+)", text, re.IGNORECASE)
+        if rf:
+            self.rf_chains.labels(zone, "rx").set(float(rf.group(1)))
+            self.rf_chains.labels(zone, "tx").set(float(rf.group(2)))
 
         if ch:
             self.operating_channel.labels(zone).set(float(ch.group(1)))
@@ -209,11 +257,32 @@ class SonosExporter:
             self.link_to.labels(zone, peer_zone, model).set(float(to_n))
 
     def parse_wireless(self, elem, zone):
-        """WiFi mode detection"""
-        mode_text = self._find_text(elem, "WifiModeString")
-        if mode_text:
-            val = 1.0 if "STATION" in mode_text.upper() else 0.0
-            self.wifi_mode.labels(zone).set(val)
+        """WiFi mode, IdleState, BusyClients"""
+        # WifiMode
+        mode = self._find_text(elem, "WifiMode")
+        mode_str = self._find_text(elem, "WifiModeString") or ""
+        if mode:
+            try:
+                self.wifi_mode.labels(zone, mode_str).set(int(mode))
+            except ValueError:
+                pass
+
+        # IdleState
+        idle = self._find_text(elem, "IdleState")
+        if idle:
+            try:
+                # Handle hex strings like '0x123'
+                val = int(idle, 0)
+                self.idle_state.labels(zone).set(val)
+            except ValueError:
+                pass
+
+        # BusyClients
+        busy = self._find_text(elem, "BusyClients")
+        if busy:
+            items = [x.strip() for x in busy.split(",") if x.strip()]
+            for item in items:
+                self.busy_state.labels(zone, item).set(1)
 
     def parse_battery(self, zp, zone):
         for bs in zp.findall(".//LocalBatteryStatus"):
@@ -254,18 +323,45 @@ class SonosExporter:
         zp_nodes = list(root.findall(".//ZPSupportInfo"))
 
         # 1st pass: build MAC→zone map
+        explicit_macs = []
         for zp in zp_nodes:
             zone = self._find_text(zp, "ZoneName") or "unknown"
             for cmd in zp.findall(".//Command"):
                 if "ifconfig" in cmd.attrib.get("cmdline", ""):
                     text = cmd.text or ""
                     for mac in re.findall(r"HWaddr\s+([0-9A-F:]{17})", text, re.I):
-                        mac_map[mac.upper()] = zone
+                        m = mac.upper()
+                        mac_map[m] = zone
+                        explicit_macs.append((m, zone))
             for f in zp.findall(".//File"):
                 if "ifconfig" in f.attrib.get("name", ""):
                     text = f.text or ""
                     for mac in re.findall(r"HWaddr\s+([0-9A-F:]{17})", text, re.I):
-                        mac_map[mac.upper()] = zone
+                        m = mac.upper()
+                        mac_map[m] = zone
+                        explicit_macs.append((m, zone))
+
+        # Infer MAC+1 for each explicit MAC (e.g. 5GHz radio often +1 but not in ifconfig)
+        for mac, zone in explicit_macs:
+            try:
+                # Convert MAC string to integer
+                mac_clean = mac.replace(":", "")
+                mac_val = int(mac_clean, 16)
+                
+                # Add 1
+                next_mac_val = mac_val + 1
+                
+                # Convert back to hex string (upper case, 12 chars)
+                next_mac_str = "{:012X}".format(next_mac_val)
+                
+                # Format with colons
+                next_mac_pretty = ":".join(next_mac_str[i:i+2] for i in range(0, 12, 2))
+                
+                # Only add if not already present (preserve explicit mappings)
+                if next_mac_pretty not in mac_map:
+                    mac_map[next_mac_pretty] = zone
+            except Exception:
+                pass
 
         # 2nd pass: parse metrics & build zone->ip map
         zone_ip_map = {}
@@ -280,6 +376,32 @@ class SonosExporter:
             # base assumption: HTTP reachability
             self.device_up.labels(zone).set(1.0)
 
+            self.device_info.labels(
+                zone=zone,
+                serial_number=self._find_text(zp, "SerialNumber") or "",
+                software_version=self._find_text(zp, "SoftwareVersion") or "",
+                sw_gen=self._find_text(zp, "SWGen") or "",
+                ip_address=ip_addr or "",
+                mac_address=self._find_text(zp, "MACAddress") or "",
+                hardware_version=self._find_text(zp, "HardwareVersion") or "",
+                series_id=self._find_text(zp, "SeriesID") or "",
+                local_uid=self._find_text(zp, "LocalUID") or "",
+            ).set(1)
+
+            # Enet
+            enet = zp.find(".//EnetPorts")
+            if enet is not None:
+                for p in enet.findall("Port"):
+                    port_idx = p.attrib.get("port", "0")
+                    link = self._find_text(p, "Link") == "1"
+                    speed_str = self._find_text(p, "Speed") or "0"
+                    try:
+                        speed = int(speed_str)
+                    except ValueError:
+                        speed = 0
+                    self.enet_link.labels(zone, port_idx).set(1 if link else 0)
+                    self.enet_speed.labels(zone, port_idx).set(speed)
+
             for w in zp.findall(".//Wireless"):
                 self.parse_wireless(w, zone)
 
@@ -292,6 +414,11 @@ class SonosExporter:
                     self.parse_ifconfig(text, zone, mac_map)
                 elif "ath_rincon/status" in cmdline:
                     self.parse_proc_status(text, zone, mac_map)
+                elif "brctl showstp" in cmdline:
+                    if "STP is disabled" in text:
+                        self.bridge_stp_enabled.labels(zone).set(0)
+                    else:
+                        self.bridge_stp_enabled.labels(zone).set(1)
 
             for f in zp.findall(".//File"):
                 fname = f.attrib.get("name", "")
@@ -358,8 +485,43 @@ class SonosExporter:
                 return None
             recv_packet, addr = sock.recvfrom(1024)
             recv_time = time.time()
-            return (recv_time - send_time) * 1000.0
-        except Exception:
+
+            # The source IP must match the destination IP.
+            # A router replying with "unreachable" would have a different source IP.
+            if addr[0] != dest_ip:
+                self.logger.debug(
+                    "ICMP reply from unexpected source %s for target %s",
+                    addr[0],
+                    dest_ip,
+                )
+                return None
+
+            # Unpack IP header to find where ICMP packet starts
+            ip_header_len = (recv_packet[0] & 0x0F) * 4
+            icmp_packet = recv_packet[ip_header_len:]
+
+            # We need at least 8 bytes for ICMP header
+            if len(icmp_packet) < 8:
+                self.logger.debug("ICMP packet from %s too short", addr[0])
+                return None
+
+            # Unpack ICMP header
+            icmp_header = icmp_packet[:8]
+            icmp_type, _code, _checksum, packet_id, sequence = struct.unpack(
+                "!BBHHH", icmp_header
+            )
+
+            # We want type 0 (echo reply) and matching id/seq
+            if icmp_type == 0 and packet_id == ident and sequence == seq:
+                return (recv_time - send_time) * 1000.0
+
+            self.logger.debug(
+                "ICMP reply from %s has wrong type/id/seq. Type: %d, ID: %d, SEQ: %d",
+                addr[0], icmp_type, packet_id, sequence
+            )
+            return None
+        except Exception as e:
+            self.logger.debug("ICMP to %s failed: %s", dest_addr, e)
             return None
         finally:
             sock.close()
@@ -372,7 +534,7 @@ class SonosExporter:
             targets.append(("custom", ip))
         return targets
 
-    def _icmp_loop(self):
+    def icmp_thread(self):
         self.logger.info("ICMP thread started")
         seq = 1
         ident = int(time.time()) & 0xFFFF
@@ -393,6 +555,7 @@ class SonosExporter:
                 up = received > 0
                 loss = (sent - received) / sent
                 latency = sum(rtts) / len(rtts) if rtts else 0.0
+                logging.debug("ICMP %s %s: sent=%d, received=%d, loss=%.2f, latency=%.2fms", zone, ip, sent, received, loss, latency)
 
                 # drive device_up when ICMP enabled (for real Sonos zones)
                 if zone != "custom":
@@ -421,8 +584,8 @@ class SonosExporter:
         # Start scrape thread
         threading.Thread(target=self.scrape_thread, daemon=True).start()
         # Start ICMP thread
-        if self.icmp_enabled:
-            threading.Thread(target=self._icmp_loop, daemon=True).start()
+        if self.icmp_interval > 0:
+            threading.Thread(target=self.icmp_thread, daemon=True).start()
         # Main thread idle
         while True:
             time.sleep(10)
@@ -460,6 +623,7 @@ def start_http_server_with_health(port):
     server = ThreadingHTTPServer(("", port), MetricsHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
+    logging.info(f"HTTP server started on port {port} with /metrics and /health")
     return server
 
 
@@ -471,13 +635,7 @@ if __name__ == "__main__":
     parser.add_argument("--interval", type=int, default=60)
     parser.add_argument("--port", type=int, default=9814)
     parser.add_argument("--log-level", default="INFO")
-
-    parser.add_argument(
-        "--icmp-disable",
-        action="store_true",
-        help="Disable ICMP metrics (enabled by default)",
-    )
-    parser.add_argument("--icmp-interval", type=int, default=30)
+    parser.add_argument("--icmp-interval", type=int, default=30, help="set 0 to disable ICMP metrics",)
     parser.add_argument("--icmp-target", action="append", default=[])
 
     args = parser.parse_args()
@@ -490,7 +648,6 @@ if __name__ == "__main__":
     exporter = SonosExporter(
         args.sonos_ip,
         interval=args.interval,
-        icmp_enabled=not args.icmp_disable,
         icmp_interval=args.icmp_interval,
         extra_icmp_targets=args.icmp_target,
     )
