@@ -54,6 +54,10 @@ class SonosExporter:
         self.zone_ip_map = {}
         self._map_lock = threading.Lock()
 
+        # Track mutable label sets so stale entries can be removed from the registry
+        self._known_busy_states = {}  # zone -> set of state label values
+        self._known_wifi_modes = {}   # zone -> mode_string label value
+
         # --- Core interface counters ---
         self.rx_bytes = Gauge("sonos_rx_bytes", "Received bytes", ["zone", "interface"])
         self.tx_bytes = Gauge("sonos_tx_bytes", "Transmitted bytes", ["zone", "interface"])
@@ -81,7 +85,7 @@ class SonosExporter:
         # --- Advanced Wifi/Radio ---
         self.ht_channel = Gauge("sonos_ht_channel", "High Throughput (HT) IEEE Channel", ["zone"])
         self.ht_ap_mode = Gauge("sonos_ht_ap_mode", "HT AP Mode (0=off, 1=on)", ["zone"])
-        self.rf_chains = Gauge("sonos_rf_chains", "RF Chains count", ["zone", "direction"]) # direction=rx|tx
+        self.rf_chains = Gauge("sonos_rf_chains", "RF Chains count", ["zone", "direction"])  # direction=rx|tx
 
         # --- Bridge / STP ---
         self.bridge_stp_enabled = Gauge("sonos_bridge_stp_enabled", "Bridge STP enabled", ["zone"])
@@ -137,9 +141,23 @@ class SonosExporter:
             ["zone", "ip"],
         )
 
+        if self.icmp_interval > 0:
+            self._check_icmp_capability()
+
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+    def _check_icmp_capability(self):
+        """Warn early if the process lacks raw socket privileges for ICMP."""
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
+            s.close()
+        except PermissionError:
+            self.logger.warning(
+                "ICMP metrics require CAP_NET_RAW (run as root or: "
+                "setcap cap_net_raw+ep <binary>). ICMP probes will fail silently."
+            )
+
     @staticmethod
     def _strip_ns(tag):
         return tag.split("}", 1)[-1] if "}" in tag else tag
@@ -194,7 +212,7 @@ class SonosExporter:
             if tx_dropped:
                 self.tx_dropped.labels(zone, iface).set(float(tx_dropped.group(1)))
 
-    def parse_proc_status(self, text, zone, mac_map):
+    def parse_proc_status(self, text, zone, mac_map, seen_links):
         """Extract PHY, channel, noise floor, OFDM ANI, link quality, HT info, RF chains"""
         ch = re.search(r"Operating on channel\s+(\d+)", text)
         ieee = re.search(r"IEEE channel:\s*(\d+)", text)
@@ -214,8 +232,7 @@ class SonosExporter:
             val = 1 if ht_ap.group(1).lower() == "on" else 0
             self.ht_ap_mode.labels(zone).set(val)
 
-        # RF Chains
-        # "RF Chains: RX:4 TX:4"
+        # RF Chains: "RF Chains: RX:4 TX:4"
         rf = re.search(r"RF Chains:\s*RX:(\d+)\s+TX:(\d+)", text, re.IGNORECASE)
         if rf:
             self.rf_chains.labels(zone, "rx").set(float(rf.group(1)))
@@ -233,10 +250,13 @@ class SonosExporter:
         if ofdm:
             self.ofdm_ani.labels(zone).set(float(ofdm.group(1)))
 
-        self.parse_sonosnet_links(text, zone, mac_map)
+        self.parse_sonosnet_links(text, zone, mac_map, seen_links)
 
-    def parse_sonosnet_links(self, text, zone, mac_map):
-        """Parse Node … FROM … TO … STP … MODEL … KEY … with zone mapping"""
+    def parse_sonosnet_links(self, text, zone, mac_map, seen_links):
+        """Parse Node … FROM … TO … STP … MODEL … KEY … with zone mapping.
+
+        Deduplicates bidirectional pairs via seen_links (mutated in-place).
+        """
         pattern = re.compile(
             r"Node\s+([0-9A-F:]{17})\s+-\s+FROM\s+(\d+)\s+:\s+TO\s+(\d+)\s+:\s+STP\s+(\S+)\s+:\s+MODEL\s+([\d.]+):\s+KEY\s+(\d+)",
             re.I,
@@ -244,6 +264,13 @@ class SonosExporter:
         for m in pattern.finditer(text):
             mac, from_n, to_n, stp, model, key = m.groups()
             peer_zone = mac_map.get(mac.upper(), mac)
+
+            # Skip the reverse direction of an already-emitted pair
+            key_pair = tuple(sorted([zone, peer_zone])) + (from_n, to_n)
+            if key_pair in seen_links:
+                continue
+            seen_links.add(key_pair)
+
             self.link_metric.labels(
                 zone=zone,
                 peer_zone=peer_zone,
@@ -258,12 +285,19 @@ class SonosExporter:
 
     def parse_wireless(self, elem, zone):
         """WiFi mode, IdleState, BusyClients"""
-        # WifiMode
+        # WifiMode — remove stale label set if mode_string changed
         mode = self._find_text(elem, "WifiMode")
         mode_str = self._find_text(elem, "WifiModeString") or ""
         if mode:
             try:
+                old_mode_str = self._known_wifi_modes.get(zone)
+                if old_mode_str is not None and old_mode_str != mode_str:
+                    try:
+                        self.wifi_mode.remove(zone, old_mode_str)
+                    except Exception:
+                        pass
                 self.wifi_mode.labels(zone, mode_str).set(int(mode))
+                self._known_wifi_modes[zone] = mode_str
             except ValueError:
                 pass
 
@@ -277,12 +311,19 @@ class SonosExporter:
             except ValueError:
                 pass
 
-        # BusyClients
+        # BusyClients — remove states that are no longer present
         busy = self._find_text(elem, "BusyClients")
+        new_states = set()
         if busy:
-            items = [x.strip() for x in busy.split(",") if x.strip()]
-            for item in items:
+            for item in (x.strip() for x in busy.split(",") if x.strip()):
                 self.busy_state.labels(zone, item).set(1)
+                new_states.add(item)
+        for stale in self._known_busy_states.get(zone, set()) - new_states:
+            try:
+                self.busy_state.remove(zone, stale)
+            except Exception:
+                pass
+        self._known_busy_states[zone] = new_states
 
     def parse_battery(self, zp, zone):
         for bs in zp.findall(".//LocalBatteryStatus"):
@@ -298,12 +339,14 @@ class SonosExporter:
                     self.logger.debug(
                         "Non-numeric battery level for zone %s: %s", zone, fields["Level"]
                     )
-            self.battery_info.labels(
-                zone,
-                fields.get("Health", "unknown"),
-                fields.get("Temperature", "unknown"),
-                fields.get("PowerSource", "unknown"),
-            ).set(1)
+            # Only emit battery_info when at least one metadata field is present
+            if any(k in fields for k in ("Health", "Temperature", "PowerSource")):
+                self.battery_info.labels(
+                    zone,
+                    fields.get("Health", "unknown"),
+                    fields.get("Temperature", "unknown"),
+                    fields.get("PowerSource", "unknown"),
+                ).set(1)
 
     # ------------------------------------------------------------------
     # Scraper
@@ -313,7 +356,9 @@ class SonosExporter:
         try:
             r = requests.get(url, timeout=15)
             r.raise_for_status()
-            root = ET.fromstring(r.text)
+            # Use r.content (bytes) so ElementTree honours the XML declaration's
+            # encoding instead of relying on requests' charset detection.
+            root = ET.fromstring(r.content)
         except Exception as e:
             self.logger.error(f"Failed to fetch {url}: {e}")
             return
@@ -344,20 +389,9 @@ class SonosExporter:
         # Infer MAC+1 for each explicit MAC (e.g. 5GHz radio often +1 but not in ifconfig)
         for mac, zone in explicit_macs:
             try:
-                # Convert MAC string to integer
-                mac_clean = mac.replace(":", "")
-                mac_val = int(mac_clean, 16)
-                
-                # Add 1
-                next_mac_val = mac_val + 1
-                
-                # Convert back to hex string (upper case, 12 chars)
-                next_mac_str = "{:012X}".format(next_mac_val)
-                
-                # Format with colons
+                mac_val = int(mac.replace(":", ""), 16)
+                next_mac_str = "{:012X}".format(mac_val + 1)
                 next_mac_pretty = ":".join(next_mac_str[i:i+2] for i in range(0, 12, 2))
-                
-                # Only add if not already present (preserve explicit mappings)
                 if next_mac_pretty not in mac_map:
                     mac_map[next_mac_pretty] = zone
             except Exception:
@@ -373,8 +407,10 @@ class SonosExporter:
                 zone_ip_map[zone] = ip_addr
 
             zones += 1
-            # base assumption: HTTP reachability
-            self.device_up.labels(zone).set(1.0)
+            # Only set device_up from HTTP reachability when ICMP is disabled;
+            # otherwise the ICMP thread is authoritative to avoid brief stale values.
+            if self.icmp_interval == 0:
+                self.device_up.labels(zone).set(1.0)
 
             self.device_info.labels(
                 zone=zone,
@@ -413,7 +449,7 @@ class SonosExporter:
                 if "ifconfig" in cmdline:
                     self.parse_ifconfig(text, zone, mac_map)
                 elif "ath_rincon/status" in cmdline:
-                    self.parse_proc_status(text, zone, mac_map)
+                    self.parse_proc_status(text, zone, mac_map, seen_links)
                 elif "brctl showstp" in cmdline:
                     if "STP is disabled" in text:
                         self.bridge_stp_enabled.labels(zone).set(0)
@@ -424,16 +460,7 @@ class SonosExporter:
                 fname = f.attrib.get("name", "")
                 text = f.text or ""
                 if "ath_rincon/status" in fname:
-                    self.parse_proc_status(text, zone, mac_map)
-
-            # Deduplicate link metrics (bidirectional pairs)
-            for k in list(self.link_metric._metrics.keys()):
-                z, peer, from_n, to_n, *_ = k
-                key_pair = tuple(sorted([z, peer])) + (from_n, to_n)
-                if key_pair in seen_links:
-                    del self.link_metric._metrics[k]
-                else:
-                    seen_links.add(key_pair)
+                    self.parse_proc_status(text, zone, mac_map, seen_links)
 
         # Update shared zone->ip map for ICMP thread
         with self._map_lock:
@@ -528,8 +555,7 @@ class SonosExporter:
 
     def _get_icmp_targets(self):
         with self._map_lock:
-            items = list(self.zone_ip_map.items())
-        targets = [(zone, ip) for zone, ip in items]
+            targets = list(self.zone_ip_map.items())
         for ip in self.extra_icmp_targets:
             targets.append(("custom", ip))
         return targets
@@ -546,6 +572,7 @@ class SonosExporter:
                 rtts = []
                 for _ in range(3):
                     rtt = self._icmp_echo(ip, timeout=1, seq=seq, ident=ident)
+                    # Wrap at 65535; avoid seq=0 as some hosts ignore it
                     seq = (seq + 1) & 0xFFFF or 1
                     if rtt is not None:
                         received += 1
@@ -555,7 +582,10 @@ class SonosExporter:
                 up = received > 0
                 loss = (sent - received) / sent
                 latency = sum(rtts) / len(rtts) if rtts else 0.0
-                logging.debug("ICMP %s %s: sent=%d, received=%d, loss=%.2f, latency=%.2fms", zone, ip, sent, received, loss, latency)
+                self.logger.debug(
+                    "ICMP %s %s: sent=%d, received=%d, loss=%.2f, latency=%.2fms",
+                    zone, ip, sent, received, loss, latency,
+                )
 
                 # drive device_up when ICMP enabled (for real Sonos zones)
                 if zone != "custom":

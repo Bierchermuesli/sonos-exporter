@@ -1,5 +1,4 @@
-.vscode --
-lazy_deploy.sh
+lazy-deploy.sh
 __pycache__/
 *.pyc
 .env
@@ -10,4 +9,5 @@ ENV/
 build/
 dist/
 *.egg-info/
-lazy-deploy.sh
+.vscode/
+test*
