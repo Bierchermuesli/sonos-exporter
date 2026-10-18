@@ -345,7 +345,7 @@
         "spec": {
           "id": 4,
           "title": "Data age",
-          "description": "Seconds since the last successful scrape. Should stay below two scrape intervals.",
+          "description": "Seconds since the last successful exporter scrape, as seen through the Prometheus scrape. Orange above 10 minutes.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -391,11 +391,11 @@
                       },
                       {
                         "color": "orange",
-                        "value": 180
+                        "value": 600
                       },
                       {
                         "color": "red",
-                        "value": 600
+                        "value": 1200
                       }
                     ]
                   },
@@ -701,7 +701,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "min by (zone) (sonos_link_quality_from)",
+                        "expr": "min by (zone) (last_over_time(sonos_link_quality_from[10m]))",
                         "range": false,
                         "instant": true,
                         "legendFormat": "{{zone}}"
@@ -786,7 +786,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sonos_uptime_seconds",
+                        "expr": "last_over_time(sonos_uptime_seconds[10m])",
                         "range": false,
                         "instant": true,
                         "legendFormat": "{{zone}}"
@@ -867,7 +867,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "count by (software_version) (sonos_device_info)",
+                        "expr": "count by (software_version) (last_over_time(sonos_device_info[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -948,7 +948,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "label_replace(sonos_device_up, \"title\", \"$1\", \"zone\", \"(.*)\")",
+                        "expr": "label_replace(last_over_time(sonos_device_up[10m]), \"title\", \"$1\", \"zone\", \"(.*)\")",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -967,7 +967,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sonos_link_quality_from",
+                        "expr": "last_over_time(sonos_link_quality_from[10m])",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -1302,7 +1302,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sonos_link_quality_from",
+                        "expr": "last_over_time(sonos_link_quality_from[10m])",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -1321,7 +1321,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sonos_link_quality_to",
+                        "expr": "last_over_time(sonos_link_quality_to[10m])",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -1509,7 +1509,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (zone) (sonos_enet_connected)",
+                        "expr": "max by (zone) (last_over_time(sonos_enet_connected[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -1528,7 +1528,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (zone) (sonos_enet_speed_mbps)",
+                        "expr": "max by (zone) (last_over_time(sonos_enet_speed_mbps[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -1547,7 +1547,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (zone) (sonos_bridge_stp_enabled)",
+                        "expr": "max by (zone) (last_over_time(sonos_bridge_stp_enabled[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -1931,7 +1931,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (zone) (sonos_ieee_channel)",
+                        "expr": "max by (zone) (last_over_time(sonos_ieee_channel[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -1950,7 +1950,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (zone) (sonos_operating_channel)",
+                        "expr": "max by (zone) (last_over_time(sonos_operating_channel[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -1969,7 +1969,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (zone) (sonos_ht_channel)",
+                        "expr": "max by (zone) (last_over_time(sonos_ht_channel[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -1988,7 +1988,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (zone) (sonos_ht_ap_mode)",
+                        "expr": "max by (zone) (last_over_time(sonos_ht_ap_mode[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -2007,7 +2007,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (zone) (sonos_rf_chains{direction=\"rx\"})",
+                        "expr": "max by (zone) (last_over_time(sonos_rf_chains{direction=\"rx\"}[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -2026,7 +2026,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (zone) (sonos_rf_chains{direction=\"tx\"})",
+                        "expr": "max by (zone) (last_over_time(sonos_rf_chains{direction=\"tx\"}[10m]))",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -2455,7 +2455,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sonos_device_info",
+                        "expr": "last_over_time(sonos_device_info[10m])",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -2557,7 +2557,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sonos_battery_level_percent",
+                        "expr": "last_over_time(sonos_battery_level_percent[10m])",
                         "range": false,
                         "instant": true,
                         "legendFormat": "{{zone}}"
@@ -2643,7 +2643,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sonos_battery_info",
+                        "expr": "last_over_time(sonos_battery_info[10m])",
                         "range": false,
                         "instant": true,
                         "format": "table"
