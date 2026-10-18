@@ -1,4 +1,6 @@
 lazy-deploy.sh
+# raw (non-anonymized) support dumps
+test_data*.html
 __pycache__/
 *.pyc
 .env
@@ -10,4 +12,3 @@ build/
 dist/
 *.egg-info/
 .vscode/
-test*

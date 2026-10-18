@@ -1,0 +1,582 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="/xml/review.xsl"?><ZPNetworkInfo type = 'User'><ZPSupportInfo><EnetPorts><Port port='0'><Link>0</Link><Speed>0</Speed></Port></EnetPorts><!-- SDT: 0 ms --><Wireless><WirelessInfo Name='Wireless Info'><WifiMode>1</WifiMode><WifiModeString>STATION_MODE</WifiModeString><IdleState>0x00000000</IdleState><BusyClients>AUDIO_OUT, NO_SONOSNET_PEERS, NO_PRIMARY</BusyClients></WirelessInfo></Wireless><!-- SDT: 0 ms --><ZPInfo><ZoneName>Stue (LF,RF)</ZoneName><ZoneIcon></ZoneIcon><Configuration>1</Configuration><LocalUID>RINCON_02000331BDA901400</LocalUID><SerialNumber>02-00-03-31-BD-A9:3</SerialNumber><SoftwareVersion>92.0-70280</SoftwareVersion><BuildType>release</BuildType><SWGen>2</SWGen><SoftwareDate>2025-10-28 23:12:07.096859</SoftwareDate><SoftwareScm>f853043380a</SoftwareScm><HHSwgenState>auto:2</HHSwgenState><MinCompatibleVersion>91.0-00000</MinCompatibleVersion><LegacyCompatibleVersion>91.0-00000</LegacyCompatibleVersion><HardwareVersion>1.35.1.12-2.2</HardwareVersion><DspVersion>0.25.3</DspVersion><SeriesID>A203</SeriesID><MfgLocation>4</MfgLocation><DateCode>0</DateCode><HwFlags>0x30</HwFlags><HwFeatures>0x0</HwFeatures><Variant>2</Variant><GeneralFlags>0x0</GeneralFlags><IPAddress>192.0.2.41</IPAddress><MACAddress>02:00:03:31:BD:A9</MACAddress><Copyright>© 2003-2025, Sonos, Inc. All rights reserved.</Copyright><ExtraInfo></ExtraInfo><HTAudioInCode>21</HTAudioInCode><IdxTrk></IdxTrk><MDP2Ver>5</MDP2Ver><MDP3Ver>2</MDP3Ver><RelBuild>1</RelBuild><AllowlistBuild>0x0</AllowlistBuild><ProdUnit>1</ProdUnit><FuseCfg>OK</FuseCfg><RevokeFuse>0x1</RevokeFuse><AuthFlags>0x0</AuthFlags><SwFeatures>0x0</SwFeatures><HouseholdControlID>Sonos_ExampleHouseholdControlIDxxxxxxxxxxxxxxxxxxxxxx</HouseholdControlID><LocationId>lc_00000000000000000000000000000000</LocationId></ZPInfo><!-- SDT: 6 ms --><File name='/VERSION'>92.0-70280
+</File><!-- SDT: 0 ms --><File name='/proc/ath_rincon/status'>Debug info for INFRA mode at 19753103
+
+Mode: INFRA (station)
+Operating on channel 2462
+   IEEE channel: 11
+Home channel is 2462
+   IEEE channel: 11
+HT Channel is 5220
+   IEEE channel: 44
+HT AP mode: on
+RF Chains: RX:4 TX:4
+RF Chainmask: RX:0x0F TX:0x0F
+Max Spatial Streams: RX:4 TX:4
+Noise Floor:    0 dBm (chain 0 ctl)
+Noise Floor:    0 dBm (chain 1 ctl)
+Noise Floor:    0 dBm (chain 2 ctl)
+Noise Floor:    0 dBm (chain 3 ctl)
+PHY errors since last reading/reset: 15038       
+Region: 2
+Radio Version: 0x00
+
+Node 02:00:04:B0:29:D4 - FROM 00 : TO 00 : STP 00 : MODEL 28.2: KEY 9
+  00
+
+Node 02:00:02:35:6E:88 - FROM 54 : TO 00 : STP 00 : MODEL 8.1: KEY 8
+  54
+
+Node 02:00:05:47:79:F0 - FROM 00  00 : TO 00 : STP 00 : MODEL 37.1: KEY -1
+  00  00
+
+Node 02:00:04:AE:BD:F6 - FROM 00  00 : TO 00 : STP 00 : MODEL 28.2: KEY -1
+  00  00
+
+Node 02:00:04:B3:92:4A - FROM 00  00 : TO 00 : STP 00 : MODEL 28.2: KEY -1
+  00  00
+</File><!-- SDT: 0 ms --><Command cmdline='/sbin/ifconfig'>apcli0    Link encap:Ethernet  HWaddr 02:00:03:31:BD:A9  
+          inet6 addr: fe80::3ff:fe31:bda9/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:51589056 errors:0 dropped:1 overruns:0 frame:0
+          TX packets:209988641 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:33460294962 (31.1 GiB)  TX bytes:154832522488 (144.1 GiB)
+
+ath0      Link encap:Ethernet  HWaddr 02:00:03:31:BD:A9  
+          inet6 addr: fe80::3ff:fe31:bda9/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:13 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:199 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+ath1      Link encap:Ethernet  HWaddr 02:00:03:31:BD:AB  
+          inet6 addr: fe80::3ff:fe31:bdab/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:22 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:199 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+br0       Link encap:Ethernet  HWaddr 02:00:03:31:BD:A9  
+          inet addr:192.0.2.41  Bcast:192.0.2.255  Mask:255.255.255.0
+          inet6 addr: 2001:db8:0:88:0:3ff:fe31:bda9/64 Scope:Global
+          inet6 addr: fe80::3ff:fe31:bda9/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:59025069 errors:0 dropped:2163871 overruns:0 frame:0
+          TX packets:288315253 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:33178379476 (30.8 GiB)  TX bytes:179154973139 (166.8 GiB)
+
+eth0      Link encap:Ethernet  HWaddr 02:00:03:31:BD:A9  
+          inet6 addr: fe80::3ff:fe31:bda9/64 Scope:Link
+          inet6 addr: 2001:db8::3ff:fe31:bda9/64 Scope:Global
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:2350184 errors:0 dropped:4 overruns:0 frame:0
+          TX packets:7712736 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:2262257979 (2.1 GiB)  TX bytes:7223871298 (6.7 GiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:885248 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:885248 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:429731148 (409.8 MiB)  TX bytes:429731148 (409.8 MiB)
+
+ra0       Link encap:Ethernet  HWaddr 02:00:01:71:ED:42  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:2018 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:167 
+
+ra1       Link encap:Ethernet  HWaddr 02:00:01:62:5C:81  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:167 
+
+</Command><!-- SDT: 4 ms --><Command cmdline='/usr/sbin/brctl showstp br0'>br0
+ STP is disabled for this interface
+</Command><!-- SDT: 2 ms --></ZPSupportInfo><ZPSupportInfo><EnetPorts></EnetPorts><!-- SDT: 0 ms --><Wireless><WirelessInfo Name='Wireless Info'><WifiMode>1</WifiMode><WifiModeString>STATION_MODE</WifiModeString><IdleState>0x00000000</IdleState><BusyClients>AUDIO_OUT, NO_SONOSNET_PEERS, NO_PRIMARY</BusyClients></WirelessInfo></Wireless><!-- SDT: 0 ms --><ZPInfo><ZoneName>Kontor (R)</ZoneName><ZoneIcon></ZoneIcon><Configuration>1</Configuration><LocalUID>RINCON_020004D8AA0701400</LocalUID><SerialNumber>02-00-04-D8-AA-07:9</SerialNumber><SoftwareVersion>92.0-70280</SoftwareVersion><BuildType>release</BuildType><SWGen>2</SWGen><SoftwareDate>2025-10-29 00:13:15.458415</SoftwareDate><SoftwareScm>f853043380a</SoftwareScm><HHSwgenState>auto:2</HHSwgenState><MinCompatibleVersion>91.0-00000</MinCompatibleVersion><LegacyCompatibleVersion>91.0-00000</LegacyCompatibleVersion><HardwareVersion>1.38.1.10-2.1</HardwareVersion><DspVersion>0.25.3</DspVersion><SeriesID>A102</SeriesID><MfgLocation>4</MfgLocation><DateCode>0</DateCode><HwFlags>0x30</HwFlags><HwFeatures>0x0</HwFeatures><Variant>1</Variant><GeneralFlags>0x0</GeneralFlags><IPAddress>192.0.2.47</IPAddress><MACAddress>02:00:04:D8:AA:07</MACAddress><Copyright>© 2003-2025, Sonos, Inc. All rights reserved.</Copyright><ExtraInfo></ExtraInfo><HTAudioInCode>0</HTAudioInCode><HTSNKPipelineVer>1</HTSNKPipelineVer><IdxTrk></IdxTrk><MDP2Ver>5</MDP2Ver><MDP3Ver>2</MDP3Ver><RelBuild>1</RelBuild><AllowlistBuild>0x0</AllowlistBuild><ProdUnit>1</ProdUnit><FuseCfg>OK</FuseCfg><RevokeFuse>0x1</RevokeFuse><AuthFlags>0x0</AuthFlags><SwFeatures>0x0</SwFeatures><HouseholdControlID>Sonos_ExampleHouseholdControlIDxxxxxxxxxxxxxxxxxxxxxx</HouseholdControlID><LocationId>lc_00000000000000000000000000000000</LocationId></ZPInfo><!-- SDT: 5 ms --><File name='/VERSION'>92.0-70280
+</File><!-- SDT: 0 ms --><File name='/proc/ath_rincon/status'>Debug info for INFRA mode at 22597100
+
+Mode: INFRA (station)
+Operating on channel 5240
+   IEEE channel: 48
+RF Chains: RX:2 TX:2
+RF Chainmask: RX:0x03 TX:0x03
+Max Spatial Streams: RX:2 TX:2
+Noise Floor:  -98 dBm (chain 0 ctl)
+Noise Floor:  -98 dBm (chain 1 ctl)
+Noise Floor:    0 dBm (chain 2 ctl)
+Noise Floor:    0 dBm (chain 3 ctl)
+PHY errors since last reading/reset: 155         
+Region: 2
+</File><!-- SDT: 0 ms --><Command cmdline='/sbin/ifconfig'>ath0      Link encap:Ethernet  HWaddr 02:00:04:D8:AA:07  
+          inet6 addr: fe80::4ff:fed8:aa07/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:43095096 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:10078813 errors:248 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:3000 
+          RX bytes:24257682149 (22.5 GiB)  TX bytes:3456298357 (3.2 GiB)
+
+br0       Link encap:Ethernet  HWaddr 02:00:04:D8:AA:07  
+          inet addr:192.0.2.47  Bcast:192.0.2.255  Mask:255.255.255.0
+          inet6 addr: 2001:db8::4ff:fed8:aa07/64 Scope:Global
+          inet6 addr: 2001:db8:0:1:0:4ff:fed8:aa07/64 Scope:Global
+          inet6 addr: fe80::4ff:fed8:aa07/64 Scope:Link
+          inet6 addr: 2001:db8:0:88:0:4ff:fed8:aa07/64 Scope:Global
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:161940169 errors:0 dropped:3187249 overruns:0 frame:0
+          TX packets:28285320 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:92539601585 (86.1 GiB)  TX bytes:9462633649 (8.8 GiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:14689 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:14689 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1233726 (1.1 MiB)  TX bytes:1233726 (1.1 MiB)
+
+</Command><!-- SDT: 5 ms --><Command cmdline='/usr/sbin/brctl showstp br0'>br0
+ STP is disabled for this interface
+</Command><!-- SDT: 2 ms --></ZPSupportInfo><ZPSupportInfo><EnetPorts><Port port='0'><Link>0</Link><Speed>0</Speed></Port></EnetPorts><!-- SDT: 0 ms --><Wireless><WirelessInfo Name='Wireless Info'><WifiMode>2</WifiMode><WifiModeString>SONOSNET_SATELLITE_STATION_PRIMARY_MODE</WifiModeString><IdleState>0x00000004</IdleState><BusyClients>LOCAL_SONOSNET, NO_PRIMARY</BusyClients></WirelessInfo></Wireless><!-- SDT: 0 ms --><ZPInfo><ZoneName>Stue (LR)</ZoneName><ZoneIcon></ZoneIcon><Configuration>1</Configuration><LocalUID>RINCON_020004AEBDF501400</LocalUID><SerialNumber>02-00-04-AE-BD-F5:3</SerialNumber><SoftwareVersion>92.0-70280</SoftwareVersion><BuildType>release</BuildType><SWGen>2</SWGen><SoftwareDate>2025-10-28 23:39:54.160589</SoftwareDate><SoftwareScm>f853043380a</SoftwareScm><HHSwgenState>auto:2</HHSwgenState><MinCompatibleVersion>91.0-00000</MinCompatibleVersion><LegacyCompatibleVersion>91.0-00000</LegacyCompatibleVersion><HardwareVersion>1.28.2.6-2.2</HardwareVersion><DspVersion>0.25.3</DspVersion><SeriesID>A200</SeriesID><MfgLocation>0</MfgLocation><DateCode>0</DateCode><HwFlags>0x30</HwFlags><HwFeatures>0x0</HwFeatures><Variant>2</Variant><GeneralFlags>0x0</GeneralFlags><IPAddress>192.0.2.42</IPAddress><MACAddress>02:00:04:AE:BD:F5</MACAddress><Copyright>© 2003-2025, Sonos, Inc. All rights reserved.</Copyright><ExtraInfo></ExtraInfo><HTAudioInCode>0</HTAudioInCode><HTSNKPipelineVer>1</HTSNKPipelineVer><IdxTrk></IdxTrk><MDP2Ver>5</MDP2Ver><MDP3Ver>2</MDP3Ver><RelBuild>1</RelBuild><AllowlistBuild>0x0</AllowlistBuild><ProdUnit>1</ProdUnit><FuseCfg>OK</FuseCfg><RevokeFuse>0x1</RevokeFuse><AuthFlags>0x0</AuthFlags><SwFeatures>0x0</SwFeatures><HouseholdControlID>Sonos_ExampleHouseholdControlIDxxxxxxxxxxxxxxxxxxxxxx</HouseholdControlID><LocationId>lc_00000000000000000000000000000000</LocationId></ZPInfo><!-- SDT: 10 ms --><File name='/VERSION'>92.0-70280
+</File><!-- SDT: 0 ms --><File name='/proc/ath_rincon/status'>Debug info for INFRA mode at 2571303
+
+Mode: INFRA (satellite)
+Operating on channel 5220
+   IEEE channel: 44
+Home channel is 2462
+   IEEE channel: 11
+SAT Primary is RINCON_02000331BDA901400
+RF Chains: RX:2 TX:2
+RF Chainmask: RX:0x03 TX:0x03
+Max Spatial Streams: RX:2 TX:2
+Noise Floor:    0 dBm (chain 0 ctl)
+Noise Floor:    0 dBm (chain 1 ctl)
+Noise Floor:    0 dBm (chain 2 ctl)
+Noise Floor:    0 dBm (chain 3 ctl)
+PHY errors since last reading/reset: 191         
+Region: 2
+
+Node 02:00:03:31:BD:AB - FROM 56 : TO 57 : STP 00 : MODEL 35.1: KEY 5
+  56
+</File><!-- SDT: 0 ms --><Command cmdline='/sbin/ifconfig'>ath0      Link encap:Ethernet  HWaddr 02:00:04:AE:BD:F6  
+          inet6 addr: fe80::4ff:feae:bdf6/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:4 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:199 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+br0       Link encap:Ethernet  HWaddr 02:00:04:AE:BD:F5  
+          inet addr:192.0.2.42  Bcast:192.0.2.255  Mask:255.255.255.0
+          inet6 addr: fe80::4ff:feae:bdf5/64 Scope:Link
+          inet6 addr: 2001:db8:0:88:0:4ff:feae:bdf5/64 Scope:Global
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:37928808 errors:0 dropped:1650933 overruns:0 frame:0
+          TX packets:5251513 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1023636140 (976.2 MiB)  TX bytes:1698875281 (1.5 GiB)
+
+eth0      Link encap:Ethernet  HWaddr 02:00:04:AE:BD:F5  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:3212 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:3212 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:261388 (255.2 KiB)  TX bytes:261388 (255.2 KiB)
+
+ra0       Link encap:Ethernet  HWaddr 02:00:01:63:80:0A  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:60 
+
+</Command><!-- SDT: 16 ms --><Command cmdline='/usr/sbin/brctl showstp br0'>br0
+ bridge id		9800.020004aebdf5
+ designated root	9800.020004aebdf5
+ root port		   0			path cost		   0
+ max age		   6.00			bridge max age		   6.00
+ hello time		   1.00			bridge hello time	   1.00
+ forward delay		   4.00			bridge forward delay	   4.00
+ ageing time		  60.00			gc interval		   0.00
+ hello timer		   0.67			tcn timer		   0.00
+ topology change timer	   0.00			gc timer		   3.95
+ flags			
+
+
+eth0 (1)
+ port id		8001			state			disabled
+ designated root	8000.020004aebdf5	path cost		  10
+ designated bridge	8000.020004aebdf5	message age timer	   0.00
+ designated port	8001			forward delay timer	   0.00
+ designated cost	   0			hold timer		   0.00
+ flags			
+
+ath0 (2) - tunnel to 02:00:03:31:BD:AB (remote STP state = unknown, direct = 3)
+ port id		8002			state			forwarding
+ designated root	9800.020004aebdf5	path cost		  50
+ designated bridge	9800.020004aebdf5	message age timer	   0.00
+ designated port	8002			forward delay timer	   0.00
+ designated cost	   0			hold timer		   0.67
+ flags			
+
+</Command><!-- SDT: 13 ms --></ZPSupportInfo><ZPSupportInfo><EnetPorts><Port port='0'><Link>0</Link><Speed>0</Speed></Port></EnetPorts><!-- SDT: 0 ms --><Wireless><WirelessInfo Name='Wireless Info'><WifiMode>2</WifiMode><WifiModeString>SONOSNET_SATELLITE_STATION_PRIMARY_MODE</WifiModeString><IdleState>0x00000004</IdleState><BusyClients>LOCAL_SONOSNET, NO_PRIMARY</BusyClients></WirelessInfo></Wireless><!-- SDT: 0 ms --><ZPInfo><ZoneName>Stue (RR)</ZoneName><ZoneIcon></ZoneIcon><Configuration>1</Configuration><LocalUID>RINCON_020004B3924901400</LocalUID><SerialNumber>02-00-04-B3-92-49:E</SerialNumber><SoftwareVersion>92.0-70280</SoftwareVersion><BuildType>release</BuildType><SWGen>2</SWGen><SoftwareDate>2025-10-28 23:39:54.160589</SoftwareDate><SoftwareScm>f853043380a</SoftwareScm><HHSwgenState>auto:2</HHSwgenState><MinCompatibleVersion>91.0-00000</MinCompatibleVersion><LegacyCompatibleVersion>91.0-00000</LegacyCompatibleVersion><HardwareVersion>1.28.2.6-2.1</HardwareVersion><DspVersion>0.25.3</DspVersion><SeriesID>A200</SeriesID><MfgLocation>0</MfgLocation><DateCode>0</DateCode><HwFlags>0x30</HwFlags><HwFeatures>0x0</HwFeatures><Variant>1</Variant><GeneralFlags>0x0</GeneralFlags><IPAddress>192.0.2.43</IPAddress><MACAddress>02:00:04:B3:92:49</MACAddress><Copyright>© 2003-2025, Sonos, Inc. All rights reserved.</Copyright><ExtraInfo></ExtraInfo><HTAudioInCode>0</HTAudioInCode><HTSNKPipelineVer>1</HTSNKPipelineVer><IdxTrk></IdxTrk><MDP2Ver>5</MDP2Ver><MDP3Ver>2</MDP3Ver><RelBuild>1</RelBuild><AllowlistBuild>0x0</AllowlistBuild><ProdUnit>1</ProdUnit><FuseCfg>OK</FuseCfg><RevokeFuse>0x1</RevokeFuse><AuthFlags>0x0</AuthFlags><SwFeatures>0x0</SwFeatures><HouseholdControlID>Sonos_ExampleHouseholdControlIDxxxxxxxxxxxxxxxxxxxxxx</HouseholdControlID><LocationId>lc_00000000000000000000000000000000</LocationId></ZPInfo><!-- SDT: 11 ms --><File name='/VERSION'>92.0-70280
+</File><!-- SDT: 0 ms --><File name='/proc/ath_rincon/status'>Debug info for INFRA mode at 5417234
+
+Mode: INFRA (satellite)
+Operating on channel 5220
+   IEEE channel: 44
+Home channel is 2462
+   IEEE channel: 11
+SAT Primary is RINCON_02000331BDA901400
+RF Chains: RX:2 TX:2
+RF Chainmask: RX:0x03 TX:0x03
+Max Spatial Streams: RX:2 TX:2
+Noise Floor:    0 dBm (chain 0 ctl)
+Noise Floor:    0 dBm (chain 1 ctl)
+Noise Floor:    0 dBm (chain 2 ctl)
+Noise Floor:    0 dBm (chain 3 ctl)
+PHY errors since last reading/reset: 1028        
+Region: 2
+
+Node 02:00:03:31:BD:AB - FROM 55 : TO 57 : STP 00 : MODEL 35.1: KEY 5
+  55
+</File><!-- SDT: 0 ms --><Command cmdline='/sbin/ifconfig'>ath0      Link encap:Ethernet  HWaddr 02:00:04:B3:92:4A  
+          inet6 addr: fe80::4ff:feb3:924a/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:172818 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:199 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+br0       Link encap:Ethernet  HWaddr 02:00:04:B3:92:49  
+          inet addr:192.0.2.43  Bcast:192.0.2.255  Mask:255.255.255.0
+          inet6 addr: fe80::4ff:feb3:9249/64 Scope:Link
+          inet6 addr: 2001:db8:0:88:0:4ff:feb3:9249/64 Scope:Global
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:37912740 errors:0 dropped:1651270 overruns:0 frame:0
+          TX packets:5237109 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1023151077 (975.7 MiB)  TX bytes:1675384320 (1.5 GiB)
+
+eth0      Link encap:Ethernet  HWaddr 02:00:04:B3:92:49  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:14706 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:14706 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:1844111 (1.7 MiB)  TX bytes:1844111 (1.7 MiB)
+
+ra0       Link encap:Ethernet  HWaddr 02:00:01:63:80:0A  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:60 
+
+</Command><!-- SDT: 18 ms --><Command cmdline='/usr/sbin/brctl showstp br0'>br0
+ bridge id		9800.020004b39249
+ designated root	9800.020004b39249
+ root port		   0			path cost		   0
+ max age		   6.00			bridge max age		   6.00
+ hello time		   1.00			bridge hello time	   1.00
+ forward delay		   4.00			bridge forward delay	   4.00
+ ageing time		  60.00			gc interval		   0.00
+ hello timer		   0.71			tcn timer		   0.00
+ topology change timer	   0.00			gc timer		   0.00
+ flags			
+
+
+eth0 (1)
+ port id		8001			state			disabled
+ designated root	8000.020004b39249	path cost		  10
+ designated bridge	8000.020004b39249	message age timer	   0.00
+ designated port	8001			forward delay timer	   0.00
+ designated cost	   0			hold timer		   0.00
+ flags			
+
+ath0 (2) - tunnel to 02:00:03:31:BD:AB (remote STP state = unknown, direct = 3)
+ port id		8002			state			forwarding
+ designated root	9800.020004b39249	path cost		  50
+ designated bridge	9800.020004b39249	message age timer	   0.00
+ designated port	8002			forward delay timer	   0.00
+ designated cost	   0			hold timer		   0.71
+ flags			
+
+</Command><!-- SDT: 11 ms --></ZPSupportInfo><ZPSupportInfo><EnetPorts><Port port='0'><Link>0</Link><Speed>0</Speed></Port></EnetPorts><!-- SDT: 0 ms --><Wireless><WirelessInfo Name='Wireless Info'><WifiMode>2</WifiMode><WifiModeString>SONOSNET_SATELLITE_STATION_PRIMARY_MODE</WifiModeString><IdleState>0x00000000</IdleState><BusyClients>AUDIO_OUT, LOCAL_SONOSNET, NO_PRIMARY</BusyClients></WirelessInfo></Wireless><!-- SDT: 0 ms --><ZPInfo><ZoneName>Sub Mini (SW)</ZoneName><ZoneIcon></ZoneIcon><Configuration>1</Configuration><LocalUID>RINCON_0200054779EF01400</LocalUID><SerialNumber>02-00-05-47-79-EF:4</SerialNumber><SoftwareVersion>92.0-70280</SoftwareVersion><BuildType>release</BuildType><SWGen>2</SWGen><SoftwareDate>2025-10-28 23:40:19.959437</SoftwareDate><SoftwareScm>f853043380a</SoftwareScm><HHSwgenState>auto:2</HHSwgenState><MinCompatibleVersion>91.0-00000</MinCompatibleVersion><LegacyCompatibleVersion>91.0-00000</LegacyCompatibleVersion><HardwareVersion>1.37.1.7-2.2</HardwareVersion><DspVersion>0.25.3</DspVersion><SeriesID>A101</SeriesID><MfgLocation>9</MfgLocation><DateCode>0</DateCode><HwFlags>0x30</HwFlags><HwFeatures>0x0</HwFeatures><Variant>2</Variant><GeneralFlags>0x0</GeneralFlags><IPAddress>192.0.2.44</IPAddress><MACAddress>02:00:05:47:79:EF</MACAddress><Copyright>© 2003-2025, Sonos, Inc. All rights reserved.</Copyright><ExtraInfo></ExtraInfo><HTAudioInCode>0</HTAudioInCode><HTSNKPipelineVer>1</HTSNKPipelineVer><IdxTrk></IdxTrk><MDP2Ver>5</MDP2Ver><MDP3Ver>2</MDP3Ver><RelBuild>1</RelBuild><AllowlistBuild>0x0</AllowlistBuild><ProdUnit>1</ProdUnit><FuseCfg>OK</FuseCfg><RevokeFuse>0x1</RevokeFuse><AuthFlags>0x0</AuthFlags><SwFeatures>0x0</SwFeatures><HouseholdControlID>Sonos_ExampleHouseholdControlIDxxxxxxxxxxxxxxxxxxxxxx</HouseholdControlID><LocationId>lc_00000000000000000000000000000000</LocationId></ZPInfo><!-- SDT: 16 ms --><File name='/VERSION'>92.0-70280
+</File><!-- SDT: 0 ms --><File name='/proc/ath_rincon/status'>Debug info for INFRA mode at 2653463
+
+Mode: INFRA (satellite)
+Operating on channel 5220
+   IEEE channel: 44
+Home channel is 2462
+   IEEE channel: 11
+SAT Primary is RINCON_02000331BDA901400
+RF Chains: RX:2 TX:2
+RF Chainmask: RX:0x03 TX:0x03
+Max Spatial Streams: RX:2 TX:2
+Noise Floor:    0 dBm (chain 0 ctl)
+Noise Floor:    0 dBm (chain 1 ctl)
+PHY errors since last reading/reset: 71          
+Region: 2
+
+Node 02:00:03:31:BD:AB - FROM 51 : TO 50 : STP 00 : MODEL 35.1: KEY 5
+  51
+</File><!-- SDT: 0 ms --><Command cmdline='/sbin/ifconfig'>ath0      Link encap:Ethernet  HWaddr 02:00:05:47:79:F0  
+          inet6 addr: fe80::5ff:fe47:79f0/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:156051 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:199 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+br0       Link encap:Ethernet  HWaddr 02:00:05:47:79:EF  
+          inet addr:192.0.2.44  Bcast:192.0.2.255  Mask:255.255.255.0
+          inet6 addr: 2001:db8:0:88:0:5ff:fe47:79ef/64 Scope:Global
+          inet6 addr: fe80::5ff:fe47:79ef/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:82315801 errors:0 dropped:1650839 overruns:0 frame:0
+          TX packets:5189463 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1830600141 (1.7 GiB)  TX bytes:1667864720 (1.5 GiB)
+
+eth0      Link encap:Ethernet  HWaddr 02:00:05:47:79:EF  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:6142 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:6142 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:685740 (669.6 KiB)  TX bytes:685740 (669.6 KiB)
+
+ra0       Link encap:Ethernet  HWaddr 02:00:01:60:BC:71  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:60 
+
+</Command><!-- SDT: 29 ms --><Command cmdline='/usr/sbin/brctl showstp br0'>br0
+ bridge id		9800.0200054779ef
+ designated root	9800.0200054779ef
+ root port		   0			path cost		   0
+ max age		   6.00			bridge max age		   6.00
+ hello time		   1.00			bridge hello time	   1.00
+ forward delay		   4.00			bridge forward delay	   4.00
+ ageing time		  60.00			gc interval		   0.00
+ hello timer		   0.62			tcn timer		   0.00
+ topology change timer	   0.00			gc timer		   3.90
+ flags			
+
+
+eth0 (1)
+ port id		8001			state			disabled
+ designated root	8000.0200054779ef	path cost		  10
+ designated bridge	8000.0200054779ef	message age timer	   0.00
+ designated port	8001			forward delay timer	   0.00
+ designated cost	   0			hold timer		   0.00
+ flags			
+
+ath0 (2) - tunnel to 02:00:03:31:BD:AB (remote STP state = unknown, direct = 3)
+ port id		8002			state			forwarding
+ designated root	9800.0200054779ef	path cost		  50
+ designated bridge	9800.0200054779ef	message age timer	   0.00
+ designated port	8002			forward delay timer	   0.00
+ designated cost	   0			hold timer		   0.62
+ flags			
+
+</Command><!-- SDT: 19 ms --></ZPSupportInfo><ZPSupportInfo><EnetPorts></EnetPorts><!-- SDT: 0 ms --><Wireless><WirelessInfo Name='Wireless Info'><WifiMode>1</WifiMode><WifiModeString>STATION_MODE</WifiModeString><IdleState>0x00000000</IdleState><BusyClients>AUDIO_OUT, NO_SONOSNET_PEERS, NO_PRIMARY</BusyClients></WirelessInfo></Wireless><!-- SDT: 0 ms --><ZPInfo><ZoneName>Kontor (L)</ZoneName><ZoneIcon></ZoneIcon><Configuration>1</Configuration><LocalUID>RINCON_020004D8AB0301400</LocalUID><SerialNumber>02-00-04-D8-AB-03:6</SerialNumber><SoftwareVersion>92.0-70280</SoftwareVersion><BuildType>release</BuildType><SWGen>2</SWGen><SoftwareDate>2025-10-29 00:13:15.458415</SoftwareDate><SoftwareScm>f853043380a</SoftwareScm><HHSwgenState>auto:2</HHSwgenState><MinCompatibleVersion>91.0-00000</MinCompatibleVersion><LegacyCompatibleVersion>91.0-00000</LegacyCompatibleVersion><HardwareVersion>1.38.1.10-2.1</HardwareVersion><DspVersion>0.25.3</DspVersion><SeriesID>A102</SeriesID><MfgLocation>4</MfgLocation><DateCode>0</DateCode><HwFlags>0x30</HwFlags><HwFeatures>0x0</HwFeatures><Variant>1</Variant><GeneralFlags>0x0</GeneralFlags><IPAddress>192.0.2.46</IPAddress><MACAddress>02:00:04:D8:AB:03</MACAddress><Copyright>© 2003-2025, Sonos, Inc. All rights reserved.</Copyright><ExtraInfo></ExtraInfo><HTAudioInCode>0</HTAudioInCode><HTSNKPipelineVer>1</HTSNKPipelineVer><IdxTrk></IdxTrk><MDP2Ver>5</MDP2Ver><MDP3Ver>2</MDP3Ver><RelBuild>1</RelBuild><AllowlistBuild>0x0</AllowlistBuild><ProdUnit>1</ProdUnit><FuseCfg>OK</FuseCfg><RevokeFuse>0x1</RevokeFuse><AuthFlags>0x0</AuthFlags><SwFeatures>0x0</SwFeatures><HouseholdControlID>Sonos_ExampleHouseholdControlIDxxxxxxxxxxxxxxxxxxxxxx</HouseholdControlID><LocationId>lc_00000000000000000000000000000000</LocationId></ZPInfo><!-- SDT: 5 ms --><File name='/VERSION'>92.0-70280
+</File><!-- SDT: 0 ms --><File name='/proc/ath_rincon/status'>Debug info for INFRA mode at 19060128
+
+Mode: INFRA (station)
+Operating on channel 5240
+   IEEE channel: 48
+RF Chains: RX:2 TX:2
+RF Chainmask: RX:0x03 TX:0x03
+Max Spatial Streams: RX:2 TX:2
+Noise Floor:  -98 dBm (chain 0 ctl)
+Noise Floor:  -98 dBm (chain 1 ctl)
+Noise Floor:    0 dBm (chain 2 ctl)
+Noise Floor:    0 dBm (chain 3 ctl)
+PHY errors since last reading/reset: 67          
+Region: 2
+</File><!-- SDT: 0 ms --><Command cmdline='/sbin/ifconfig'>ath0      Link encap:Ethernet  HWaddr 02:00:04:D8:AB:03  
+          inet6 addr: fe80::4ff:fed8:ab03/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:44168995 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:11096062 errors:218 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:3000 
+          RX bytes:24412176074 (22.7 GiB)  TX bytes:3603013713 (3.3 GiB)
+
+br0       Link encap:Ethernet  HWaddr 02:00:04:D8:AB:03  
+          inet addr:192.0.2.46  Bcast:192.0.2.255  Mask:255.255.255.0
+          inet6 addr: 2001:db8:0:88:0:4ff:fed8:ab03/64 Scope:Global
+          inet6 addr: fe80::4ff:fed8:ab03/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:46460486 errors:0 dropped:1268685 overruns:0 frame:0
+          TX packets:10974157 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:24712423846 (23.0 GiB)  TX bytes:3665822501 (3.4 GiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:2462 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2462 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:142352 (139.0 KiB)  TX bytes:142352 (139.0 KiB)
+
+</Command><!-- SDT: 5 ms --><Command cmdline='/usr/sbin/brctl showstp br0'>br0
+ STP is disabled for this interface
+</Command><!-- SDT: 2 ms --></ZPSupportInfo><ZPSupportInfo><LocalBatteryStatus>
+<Data name="Health">GREEN</Data>
+<Data name="Level">100</Data>
+<Data name="Temperature">NORMAL</Data>
+<Data name="PowerSource">USB_POWER</Data>
+</LocalBatteryStatus><!-- SDT: 0 ms --><EnetPorts></EnetPorts><!-- SDT: 0 ms --><Wireless><WirelessInfo Name='Wireless Info'><WifiMode>1</WifiMode><WifiModeString>STATION_MODE</WifiModeString><IdleState>0x00000000</IdleState><BusyClients>AUDIO_OUT, NO_SONOSNET_PEERS, NO_PRIMARY</BusyClients></WirelessInfo></Wireless><!-- SDT: 0 ms --><ZPInfo><ZoneName>Sonos Roam SL</ZoneName><ZoneIcon></ZoneIcon><Configuration>1</Configuration><LocalUID>RINCON_02000571537101400</LocalUID><SerialNumber>02-00-05-71-53-71:1</SerialNumber><SoftwareVersion>92.0-70280</SoftwareVersion><BuildType>release</BuildType><SWGen>2</SWGen><SoftwareDate>2025-10-28 23:32:23.286312</SoftwareDate><SoftwareScm>f853043380a</SoftwareScm><HHSwgenState>auto:2</HHSwgenState><MinCompatibleVersion>91.0-00000</MinCompatibleVersion><LegacyCompatibleVersion>91.0-00000</LegacyCompatibleVersion><HardwareVersion>1.33.2.6-2.9</HardwareVersion><DspVersion>0.25.3</DspVersion><SeriesID>A102</SeriesID><MfgLocation>0</MfgLocation><DateCode>0</DateCode><HwFlags>0x34</HwFlags><HwFeatures>0x20000</HwFeatures><Variant>9</Variant><GeneralFlags>0x0</GeneralFlags><IPAddress>192.0.2.48</IPAddress><MACAddress>02:00:05:71:53:71</MACAddress><Copyright>© 2003-2025, Sonos, Inc. All rights reserved.</Copyright><ExtraInfo></ExtraInfo><HTAudioInCode>0</HTAudioInCode><IdxTrk></IdxTrk><MDP2Ver>5</MDP2Ver><MDP3Ver>2</MDP3Ver><RelBuild>1</RelBuild><AllowlistBuild>0x0</AllowlistBuild><ProdUnit>1</ProdUnit><FuseCfg>OK</FuseCfg><RevokeFuse>0x1</RevokeFuse><AuthFlags>0x0</AuthFlags><SwFeatures>0x0</SwFeatures><HouseholdControlID>Sonos_ExampleHouseholdControlIDxxxxxxxxxxxxxxxxxxxxxx</HouseholdControlID><LocationId>lc_00000000000000000000000000000000</LocationId></ZPInfo><!-- SDT: 8 ms --><File name='/VERSION'>92.0-70280
+</File><!-- SDT: 0 ms --><File name='/proc/ath_rincon/status'>error opening file /proc/ath_rincon/status (errno=2 No such file or directory)</File><!-- SDT: 0 ms --><Command cmdline='/sbin/ifconfig'>ath0      Link encap:Ethernet  HWaddr 02:00:05:71:53:71  
+          inet6 addr: fe80::5ff:fe71:5371/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:229833 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:105718 errors:9 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:3000 
+          RX bytes:89218226 (85.0 MiB)  TX bytes:51437359 (49.0 MiB)
+
+br0       Link encap:Ethernet  HWaddr 02:00:05:71:53:71  
+          inet addr:192.0.2.48  Bcast:192.0.2.255  Mask:255.255.255.0
+          inet6 addr: fe80::5ff:fe71:5371/64 Scope:Link
+          inet6 addr: 2001:db8:0:88:0:5ff:fe71:5371/64 Scope:Global
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:5133153 errors:0 dropped:76985 overruns:0 frame:0
+          TX packets:280883 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:4925775569 (4.5 GiB)  TX bytes:148983088 (142.0 MiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:90 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:90 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:6478 (6.3 KiB)  TX bytes:6478 (6.3 KiB)
+
+</Command><!-- SDT: 6 ms --><Command cmdline='/usr/sbin/brctl showstp br0'>br0
+ STP is disabled for this interface
+</Command><!-- SDT: 5 ms --></ZPSupportInfo><ZPSupportInfo><EnetPorts><Port port='0'><Link>0</Link><Speed>0</Speed></Port></EnetPorts><!-- SDT: 0 ms --><Wireless><WirelessInfo Name='Wireless Info'><WifiMode>1</WifiMode><WifiModeString>STATION_MODE</WifiModeString><IdleState>0x00000000</IdleState><BusyClients>AUDIO_OUT, NO_SONOSNET_PEERS, NO_PRIMARY</BusyClients></WirelessInfo></Wireless><!-- SDT: 0 ms --><ZPInfo><ZoneName>Bedroom</ZoneName><ZoneIcon></ZoneIcon><Configuration>1</Configuration><LocalUID>RINCON_020004B029D301400</LocalUID><SerialNumber>02-00-04-B0-29-D3:A</SerialNumber><SoftwareVersion>92.0-70280</SoftwareVersion><BuildType>release</BuildType><SWGen>2</SWGen><SoftwareDate>2025-10-28 23:39:54.160589</SoftwareDate><SoftwareScm>f853043380a</SoftwareScm><HHSwgenState>auto:2</HHSwgenState><MinCompatibleVersion>91.0-00000</MinCompatibleVersion><LegacyCompatibleVersion>91.0-00000</LegacyCompatibleVersion><HardwareVersion>1.28.2.6-2.2</HardwareVersion><DspVersion>0.25.3</DspVersion><SeriesID>A200</SeriesID><MfgLocation>0</MfgLocation><DateCode>0</DateCode><HwFlags>0x30</HwFlags><HwFeatures>0x0</HwFeatures><Variant>2</Variant><GeneralFlags>0x0</GeneralFlags><IPAddress>192.0.2.49</IPAddress><MACAddress>02:00:04:B0:29:D3</MACAddress><Copyright>© 2003-2025, Sonos, Inc. All rights reserved.</Copyright><ExtraInfo></ExtraInfo><HTAudioInCode>0</HTAudioInCode><HTSNKPipelineVer>1</HTSNKPipelineVer><IdxTrk></IdxTrk><MDP2Ver>5</MDP2Ver><MDP3Ver>2</MDP3Ver><RelBuild>1</RelBuild><AllowlistBuild>0x0</AllowlistBuild><ProdUnit>1</ProdUnit><FuseCfg>OK</FuseCfg><RevokeFuse>0x1</RevokeFuse><AuthFlags>0x0</AuthFlags><SwFeatures>0x0</SwFeatures><HouseholdControlID>Sonos_ExampleHouseholdControlIDxxxxxxxxxxxxxxxxxxxxxx</HouseholdControlID><LocationId>lc_00000000000000000000000000000000</LocationId></ZPInfo><!-- SDT: 8 ms --><File name='/VERSION'>92.0-70280
+</File><!-- SDT: 0 ms --><File name='/proc/ath_rincon/status'>Debug info for INFRA mode at 222719
+
+Mode: INFRA (station)
+Operating on channel 5200
+   IEEE channel: 40
+Home channel is 2462
+   IEEE channel: 11
+RF Chains: RX:2 TX:2
+RF Chainmask: RX:0x03 TX:0x03
+Max Spatial Streams: RX:2 TX:2
+Noise Floor:    0 dBm (chain 0 ctl)
+Noise Floor:    0 dBm (chain 1 ctl)
+Noise Floor:    0 dBm (chain 2 ctl)
+Noise Floor:    0 dBm (chain 3 ctl)
+PHY errors since last reading/reset: 302         
+Region: 2
+
+Node 02:00:02:35:6E:88 - FROM 24 : TO 24 : STP 00 : MODEL 8.1: KEY 6
+  24
+
+Node 02:00:03:31:BD:AA - FROM 00 : TO 00 : STP 00 : MODEL 35.1: KEY 5
+  00
+</File><!-- SDT: 0 ms --><Command cmdline='/sbin/ifconfig'>apcli0    Link encap:Ethernet  HWaddr 02:00:04:B0:29:D3  
+          inet6 addr: fe80::4ff:feb0:29d3/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:6820429 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:755674 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1923592390 (1.7 GiB)  TX bytes:401947627 (383.3 MiB)
+
+ath0      Link encap:Ethernet  HWaddr 02:00:04:B0:29:D3  
+          inet6 addr: fe80::4ff:feb0:29d3/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:199 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+br0       Link encap:Ethernet  HWaddr 02:00:04:B0:29:D3  
+          inet addr:192.0.2.49  Bcast:192.0.2.255  Mask:255.255.255.0
+          inet6 addr: fe80::4ff:feb0:29d3/64 Scope:Link
+          inet6 addr: 2001:db8:0:88:0:4ff:feb0:29d3/64 Scope:Global
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:6643189 errors:0 dropped:170702 overruns:0 frame:0
+          TX packets:722564 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1509302271 (1.4 GiB)  TX bytes:400401312 (381.8 MiB)
+
+eth0      Link encap:Ethernet  HWaddr 02:00:04:B0:29:D3  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:208 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:208 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:19574 (19.1 KiB)  TX bytes:19574 (19.1 KiB)
+
+ra0       Link encap:Ethernet  HWaddr 02:00:01:63:80:0A  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:60 
+
+</Command><!-- SDT: 13 ms --><Command cmdline='/usr/sbin/brctl showstp br0'>br0
+ STP is disabled for this interface
+</Command><!-- SDT: 10 ms --></ZPSupportInfo></ZPNetworkInfo>
