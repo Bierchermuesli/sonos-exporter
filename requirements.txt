@@ -1,3 +1,2 @@
 prometheus-client
 requests
-logger

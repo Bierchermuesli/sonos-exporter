@@ -5,18 +5,16 @@ services:
     restart: unless-stopped
     ports:
       - "9814:9814"
-    command: ["--sonos-ip", "${SONOS_IP:-100.88.88.41}", "--interval", "60"]
+    # SONOS_IP: IP of any Sonos player in the household
+    command: ["--sonos-ip", "${SONOS_IP:?set SONOS_IP to a Sonos player IP}", "--interval", "60"]
+    # Unprivileged ICMP (preferred, no root needed)
+    sysctls:
+      - net.ipv4.ping_group_range=0 2147483647
+    # Fallback for kernels without ping sockets; remove if not needed
     cap_add:
-      - NET_RAW  
-    networks:
-      - monitoring
+      - NET_RAW
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9814/health || exit 1"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:9814/health')\""]
       interval: 1m30s
       timeout: 10s
       retries: 3
-
-
-networks:
-  monitoring:
-    driver: bridge
