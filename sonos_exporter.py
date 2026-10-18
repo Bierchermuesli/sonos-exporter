@@ -47,7 +47,8 @@ class SonosExporter:
     ):
         self.sonos_ip = sonos_ip
         self.interval = interval
-        self.icmp_interval = min(icmp_interval, interval) if icmp_interval else interval
+        # 0 disables ICMP entirely; otherwise never probe slower than we scrape
+        self.icmp_interval = min(icmp_interval, interval) if icmp_interval > 0 else 0
         self.extra_icmp_targets = extra_icmp_targets or []
 
         self.logger = logging.getLogger("sonos_exporter")
@@ -141,22 +142,58 @@ class SonosExporter:
             ["zone", "ip"],
         )
 
+        self._icmp_use_raw = None
         if self.icmp_interval > 0:
-            self._check_icmp_capability()
+            self._detect_icmp_mode()
 
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
-    def _check_icmp_capability(self):
-        """Warn early if the process lacks raw socket privileges for ICMP."""
+    def _detect_icmp_mode(self):
+        """Decide once whether to use unprivileged DGRAM or raw ICMP sockets.
+
+        Sets self._icmp_use_raw to False (DGRAM), True (RAW) or None (neither
+        available; probes will fail until permissions change).
+        """
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.getprotobyname("icmp"))
+            s.close()
+            self._icmp_use_raw = False
+            return
+        except OSError as e:
+            dgram_err = e
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
             s.close()
-        except PermissionError:
-            self.logger.warning(
-                "ICMP metrics require CAP_NET_RAW (run as root or: "
-                "setcap cap_net_raw+ep <binary>). ICMP probes will fail silently."
+            self._icmp_use_raw = True
+            self.logger.info(
+                "Unprivileged ICMP (SOCK_DGRAM) not available (%s); using raw socket "
+                "(CAP_NET_RAW). To avoid root: "
+                "sysctl -w net.ipv4.ping_group_range='0 2147483647'",
+                dgram_err,
             )
+        except OSError as e:
+            self._icmp_use_raw = None
+            self.logger.warning(
+                "ICMP probes will fail: neither SOCK_DGRAM ICMP (%s, needs ping_group_range) "
+                "nor SOCK_RAW (%s, needs CAP_NET_RAW) is accessible.",
+                dgram_err,
+                e,
+            )
+
+    def _open_icmp_socket(self):
+        """Open an ICMP socket in the mode chosen by _detect_icmp_mode().
+
+        Returns (sock, use_raw). If no mode was available at startup, retry
+        detection so a later permission change is picked up without restart.
+        """
+        if self._icmp_use_raw is None:
+            self._detect_icmp_mode()
+            if self._icmp_use_raw is None:
+                raise PermissionError("no ICMP socket type accessible")
+        sock_type = socket.SOCK_RAW if self._icmp_use_raw else socket.SOCK_DGRAM
+        sock = socket.socket(socket.AF_INET, sock_type, socket.getprotobyname("icmp"))
+        return sock, self._icmp_use_raw
 
     @staticmethod
     def _strip_ns(tag):
@@ -490,14 +527,25 @@ class SonosExporter:
 
     def _icmp_echo(self, dest_addr, timeout=1, seq=1, ident=0x1234):
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
-        except Exception as e:
+            sock, use_raw = self._open_icmp_socket()
+        except OSError as e:
             self.logger.error("ICMP socket error: %s", e)
             return None
 
         try:
             sock.settimeout(timeout)
             dest_ip = socket.gethostbyname(dest_addr)
+
+            if not use_raw:
+                # On Linux ping sockets the kernel overwrites the echo identifier
+                # with the socket's local "port". Bind to our ident so replies
+                # carry it; if that fails (in use), we read back whatever the
+                # kernel assigned after sending.
+                try:
+                    sock.bind(("", ident))
+                except OSError:
+                    pass
+
             header = struct.pack("!BBHHH", 8, 0, 0, ident, seq)
             data = struct.pack("!d", time.time())
             chksum = self._icmp_checksum(header + data)
@@ -507,45 +555,56 @@ class SonosExporter:
             send_time = time.time()
             sock.sendto(packet, (dest_ip, 1))
 
-            ready = select.select([sock], [], [], timeout)
-            if not ready[0]:
-                return None
-            recv_packet, addr = sock.recvfrom(1024)
-            recv_time = time.time()
+            expect_id = ident
+            if not use_raw:
+                # Autobind happens on send; the assigned port is the echo id.
+                expect_id = sock.getsockname()[1] or ident
 
-            # The source IP must match the destination IP.
-            # A router replying with "unreachable" would have a different source IP.
-            if addr[0] != dest_ip:
-                self.logger.debug(
-                    "ICMP reply from unexpected source %s for target %s",
-                    addr[0],
-                    dest_ip,
+            # Loop until we get our matching reply or the deadline passes.
+            # Raw sockets receive all ICMP traffic on the host, so non-matching
+            # packets must be skipped rather than causing a false loss reading.
+            deadline = send_time + timeout
+            while True:
+                remaining = deadline - time.time()
+                if remaining <= 0:
+                    return None
+                if not select.select([sock], [], [], remaining)[0]:
+                    return None
+
+                recv_packet, addr = sock.recvfrom(1024)
+                recv_time = time.time()
+
+                if addr[0] != dest_ip:
+                    self.logger.debug(
+                        "ICMP %s: skipping packet from unexpected source %s", dest_addr, addr[0]
+                    )
+                    continue
+
+                # RAW sockets always include the IP header. DGRAM sockets strip
+                # it on Linux but not on macOS/BSD, so detect it by the version
+                # nibble (an ICMP echo reply starts with type 0, never 0x4X).
+                if recv_packet and (use_raw or (recv_packet[0] >> 4) == 4):
+                    ip_header_len = (recv_packet[0] & 0x0F) * 4
+                    icmp_data = recv_packet[ip_header_len:]
+                else:
+                    icmp_data = recv_packet
+
+                if len(icmp_data) < 8:
+                    self.logger.debug("ICMP %s: packet too short (%d bytes)", dest_addr, len(icmp_data))
+                    continue
+
+                icmp_type, _code, _checksum, packet_id, sequence = struct.unpack(
+                    "!BBHHH", icmp_data[:8]
                 )
-                return None
 
-            # Unpack IP header to find where ICMP packet starts
-            ip_header_len = (recv_packet[0] & 0x0F) * 4
-            icmp_packet = recv_packet[ip_header_len:]
+                if icmp_type == 0 and packet_id == expect_id and sequence == seq:
+                    return (recv_time - send_time) * 1000.0
 
-            # We need at least 8 bytes for ICMP header
-            if len(icmp_packet) < 8:
-                self.logger.debug("ICMP packet from %s too short", addr[0])
-                return None
-
-            # Unpack ICMP header
-            icmp_header = icmp_packet[:8]
-            icmp_type, _code, _checksum, packet_id, sequence = struct.unpack(
-                "!BBHHH", icmp_header
-            )
-
-            # We want type 0 (echo reply) and matching id/seq
-            if icmp_type == 0 and packet_id == ident and sequence == seq:
-                return (recv_time - send_time) * 1000.0
-
-            self.logger.debug(
-                "ICMP reply from %s has wrong type/id/seq. Type: %d, ID: %d, SEQ: %d",
-                addr[0], icmp_type, packet_id, sequence
-            )
+                self.logger.debug(
+                    "ICMP %s: skipping type=%d id=%d seq=%d (want type=0 id=%d seq=%d)",
+                    dest_addr, icmp_type, packet_id, sequence, expect_id, seq,
+                )
+        except socket.timeout:
             return None
         except Exception as e:
             self.logger.debug("ICMP to %s failed: %s", dest_addr, e)
@@ -563,7 +622,7 @@ class SonosExporter:
     def icmp_thread(self):
         self.logger.info("ICMP thread started")
         seq = 1
-        ident = int(time.time()) & 0xFFFF
+        ident = (int(time.time()) & 0xFFFF) or 1
 
         while True:
             start = time.time()
