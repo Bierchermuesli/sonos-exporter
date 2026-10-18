@@ -183,7 +183,7 @@ class SonosExporter:
             self.logger.info(
                 "Unprivileged ICMP (SOCK_DGRAM) not available (%s); using raw socket "
                 "(CAP_NET_RAW). To avoid root: "
-                "sysctl -w net.ipv4.ping_group_range='0 2147483647'",
+                "sysctl -w net.ipv4.ping_group_range='0 65535'",
                 dgram_err,
             )
         except OSError as e:

@@ -44,7 +44,7 @@ raw sockets when those are unavailable. Unprivileged ICMP needs the kernel to
 allow it for the exporter's group:
 
 ```sh
-sysctl -w net.ipv4.ping_group_range='0 2147483647'
+sysctl -w net.ipv4.ping_group_range='0 65535'
 ```
 
 The Compose file sets this sysctl for the container and additionally grants

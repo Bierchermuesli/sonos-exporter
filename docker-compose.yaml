@@ -9,7 +9,7 @@ services:
     command: ["--sonos-ip", "${SONOS_IP:?set SONOS_IP to a Sonos player IP}", "--interval", "60"]
     # Unprivileged ICMP (preferred, no root needed)
     sysctls:
-      - net.ipv4.ping_group_range=0 2147483647
+      - net.ipv4.ping_group_range=0 65535
     # Fallback for kernels without ping sockets; remove if not needed
     cap_add:
       - NET_RAW
