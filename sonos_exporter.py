@@ -10,6 +10,7 @@ Features:
  - MAC→Zone mapping for human-readable topology
  - Optional ICMP probe metrics (loss/latency) for all Sonos IPs and extra targets
  - Optional battery metrics when LocalBatteryStatus is present
+ - Player uptime, exporter scrape health
  - Threaded scrape + ICMP
  - Custom HTTP server with:
      * /metrics        - Prometheus metrics
@@ -93,6 +94,7 @@ class SonosExporter:
 
         # Device up (overridden by ICMP if enabled)
         self.device_up = Gauge("sonos_device_up", "Reachable (ICMP if enabled)", ["zone"])
+        self.uptime = Gauge("sonos_uptime_seconds", "Seconds since the player booted", ["zone"])
 
         # --- Device Info ---
         self.device_info = Gauge(
@@ -130,6 +132,18 @@ class SonosExporter:
         )
         self.link_to = Gauge(
             "sonos_link_quality_to", "TO link quality", ["zone", "peer_zone", "model"]
+        )
+
+        # --- Exporter health ---
+        self.scrape_success = Gauge(
+            "sonos_scrape_success", "1 if the last /support/review scrape succeeded"
+        )
+        self.scrape_duration = Gauge(
+            "sonos_scrape_duration_seconds", "Duration of the last scrape"
+        )
+        self.scrape_last_success = Gauge(
+            "sonos_scrape_last_success_timestamp_seconds",
+            "Unix timestamp of the last successful scrape",
         )
 
         # --- ICMP-related metrics ---
@@ -256,6 +270,10 @@ class SonosExporter:
         phy = re.search(r"PHY errors.*?:\s*(\d+)", text)
         noise = [int(n) for n in re.findall(r"Noise Floor:\s*(-?\d+)", text)]
         ofdm = re.search(r"OFDM ANI level:\s*(\d+)", text)
+        # "Debug info for INFRA mode at N": N advances once per second since boot
+        uptime = re.search(r"INFRA mode at\s+(\d+)", text)
+        if uptime:
+            self.uptime.labels(zone).set(float(uptime.group(1)))
 
         # HT Channel (multiline check)
         # Look for HT Channel line, then capture the IEEE channel below it
@@ -281,7 +299,9 @@ class SonosExporter:
             self.ieee_channel.labels(zone).set(float(ieee.group(1)))
         if phy:
             self.phy_errors.labels(zone).set(float(phy.group(1)))
-        if noise:
+        # Newer (MediaTek based) players report 0 dBm on every chain, meaning
+        # "not available" rather than a real noise floor; skip those.
+        if noise and any(noise):
             avg_noise = sum(noise) / len(noise)
             self.noise_floor.labels(zone).set(avg_noise)
         if ofdm:
@@ -389,16 +409,25 @@ class SonosExporter:
     # Scraper
     # ------------------------------------------------------------------
     def scrape_once(self):
-        url = f"http://{self.sonos_ip}:1400/support/review"
+        start = time.time()
         try:
-            r = requests.get(url, timeout=15)
-            r.raise_for_status()
-            # Use r.content (bytes) so ElementTree honours the XML declaration's
-            # encoding instead of relying on requests' charset detection.
-            root = ET.fromstring(r.content)
+            self._scrape()
         except Exception as e:
-            self.logger.error(f"Failed to fetch {url}: {e}")
-            return
+            self.logger.error("Scrape failed: %s", e)
+            self.scrape_success.set(0)
+        else:
+            self.scrape_success.set(1)
+            self.scrape_last_success.set(time.time())
+        finally:
+            self.scrape_duration.set(time.time() - start)
+
+    def _scrape(self):
+        url = f"http://{self.sonos_ip}:1400/support/review"
+        r = requests.get(url, timeout=15)
+        r.raise_for_status()
+        # Use r.content (bytes) so ElementTree honours the XML declaration's
+        # encoding instead of relying on requests' charset detection.
+        root = ET.fromstring(r.content)
 
         zones = 0
         mac_map = {}

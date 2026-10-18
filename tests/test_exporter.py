@@ -139,6 +139,20 @@ class TestReview(ExporterFixtureTest):
     def test_device_up_from_http_when_icmp_disabled(self):
         self.assertEqual(sample_value("sonos_device_up", zone="Stue (LF,RF)"), 1.0)
 
+    def test_uptime(self):
+        self.assertEqual(sample_value("sonos_uptime_seconds", zone="Stue (LF,RF)"), 19777690.0)
+        self.assertEqual(sample_value("sonos_uptime_seconds", zone="Kitchen"), 4867.0)
+
+    def test_noise_floor_only_when_reported(self):
+        # Kitchen reports three real chains, the newer players report 0 dBm everywhere
+        self.assertAlmostEqual(sample_value("sonos_noise_floor_dbm", zone="Kitchen"), -113.67, places=2)
+        self.assertIsNone(sample_value("sonos_noise_floor_dbm", zone="Stue (LF,RF)"))
+
+    def test_scrape_health(self):
+        self.assertEqual(sample_value("sonos_scrape_success"), 1.0)
+        self.assertGreater(sample_value("sonos_scrape_last_success_timestamp_seconds"), 1.7e9)
+        self.assertGreaterEqual(sample_value("sonos_scrape_duration_seconds"), 0.0)
+
 
 class TestReviewWithBattery(ExporterFixtureTest):
     fixture = "review_battery.xml"
@@ -169,6 +183,22 @@ class TestReviewWithBattery(ExporterFixtureTest):
             ),
             1.0,
         )
+
+
+class TestScrapeFailure(unittest.TestCase):
+    def tearDown(self):
+        for collector in list(REGISTRY._names_to_collectors.values()):
+            try:
+                REGISTRY.unregister(collector)
+            except KeyError:
+                pass
+
+    def test_failed_scrape_is_reported(self):
+        exporter = sonos_exporter.SonosExporter(sonos_ip="192.0.2.41", icmp_interval=0)
+        with patch("sonos_exporter.requests.get", side_effect=OSError("unreachable")):
+            exporter.scrape_once()
+        self.assertEqual(sample_value("sonos_scrape_success"), 0.0)
+        self.assertEqual(sample_value("sonos_scrape_last_success_timestamp_seconds"), 0.0)
 
 
 class TestIcmpHelpers(unittest.TestCase):

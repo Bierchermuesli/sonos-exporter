@@ -60,18 +60,29 @@ All metrics carry a `zone` label. The most useful ones:
 |---|---|---|
 | `sonos_device_up` | | 1 if reachable (ICMP when enabled, else HTTP) |
 | `sonos_device_info` | serial, versions, ip, mac, ... | Always 1, carries device metadata |
+| `sonos_uptime_seconds` | | Seconds since the player booted |
 | `sonos_rx_bytes`, `sonos_tx_bytes`, `..._packets`, `..._errors`, `..._dropped` | interface | Interface counters |
 | `sonos_wifi_mode` | mode_string | Station, SonosNet satellite, ... |
 | `sonos_idle_state`, `sonos_busy_state` | state | Radio idle/busy flags |
 | `sonos_operating_channel`, `sonos_ieee_channel`, `sonos_ht_channel`, `sonos_ht_ap_mode` | | Channel details |
 | `sonos_rf_chains` | direction | RX/TX chain count |
-| `sonos_noise_floor_dbm`, `sonos_phy_errors`, `sonos_ofdm_ani_level` | | Radio quality |
+| `sonos_phy_errors` | | PHY error counter, resets on its own |
+| `sonos_noise_floor_dbm`, `sonos_ofdm_ani_level` | | Radio quality, only reported by older Atheros based players |
 | `sonos_link_connection` | peer_zone, model, stp, ... | One entry per SonosNet mesh link |
 | `sonos_link_quality_from`, `sonos_link_quality_to` | peer_zone, model | Link quality per direction |
 | `sonos_bridge_stp_enabled` | | Bridge STP state |
 | `sonos_enet_connected`, `sonos_enet_speed_mbps` | port | Ethernet port state |
 | `sonos_battery_level_percent`, `sonos_battery_info` | health, temperature, power_source | Portable players only |
 | `icmp_loss`, `icmp_latency_ms`, `sonos_icmp_last_success_timestamp` | ip | ICMP probe results |
+| `sonos_scrape_success`, `sonos_scrape_duration_seconds`, `sonos_scrape_last_success_timestamp_seconds` | | Exporter health, alert on these first |
+
+## Grafana dashboard
+
+`grafana/sonos-overview-dashboard.json` is a Grafana 12 dashboard (v2 schema)
+with reachability, SonosNet topology as a node graph, link quality, radio
+state, traffic and inventory. The battery and legacy radio rows render only
+when a player actually reports those metrics. Import it via Dashboards, New,
+Import, or push it with a tool like gcx. It uses the default datasource.
 
 ## Tests
 
