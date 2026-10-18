@@ -684,7 +684,7 @@
         "spec": {
           "id": 8,
           "title": "Weakest link per zone",
-          "description": "Lowest SonosNet FROM quality a zone has towards any peer. Below 40 is a weak mesh link.",
+          "description": "Lowest SonosNet FROM quality a zone has towards any peer, idle links with quality 0 ignored. Below 40 is a weak mesh link.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -701,7 +701,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "min by (zone) (last_over_time(sonos_link_quality_from[10m]))",
+                        "expr": "min by (zone) (last_over_time(sonos_link_quality_from[10m]) > 0)",
                         "range": false,
                         "instant": true,
                         "legendFormat": "{{zone}}"
@@ -931,7 +931,7 @@
         "spec": {
           "id": 11,
           "title": "Topology",
-          "description": "SonosNet mesh as reported by each player. Edge value is the FROM link quality, node ring is green when the player is up.",
+          "description": "SonosNet mesh as reported by each player. Edge value is the FROM link quality, node is green when the player is up.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -948,7 +948,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "label_replace(last_over_time(sonos_device_up[10m]), \"title\", \"$1\", \"zone\", \"(.*)\")",
+                        "expr": "label_replace(label_replace(label_replace(last_over_time(sonos_device_up[10m]) == 1, \"color\", \"green\", \"\", \"\"), \"id\", \"$1\", \"zone\", \"(.*)\"), \"title\", \"$1\", \"zone\", \"(.*)\") or label_replace(label_replace(label_replace(last_over_time(sonos_device_up[10m]) == 0, \"color\", \"red\", \"\", \"\"), \"id\", \"$1\", \"zone\", \"(.*)\"), \"title\", \"$1\", \"zone\", \"(.*)\")",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -967,7 +967,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "last_over_time(sonos_link_quality_from[10m])",
+                        "expr": "label_join(label_replace(label_replace(last_over_time(sonos_link_quality_from[10m]), \"source\", \"$1\", \"zone\", \"(.*)\"), \"target\", \"$1\", \"peer_zone\", \"(.*)\"), \"id\", \" > \", \"zone\", \"peer_zone\")",
                         "range": false,
                         "instant": true,
                         "format": "table"
@@ -987,101 +987,15 @@
                         "Time": true,
                         "__name__": true,
                         "instance": true,
-                        "job": true
-                      },
-                      "renameByName": {
-                        "zone": "id",
-                        "Value #N": "arc__up"
-                      }
-                    },
-                    "filter": {
-                      "id": "byRefId",
-                      "options": "N"
-                    }
-                  }
-                },
-                {
-                  "kind": "Transformation",
-                  "group": "calculateField",
-                  "spec": {
-                    "options": {
-                      "mode": "binary",
-                      "alias": "arc__down",
-                      "binary": {
-                        "left": {
-                          "fixed": "1"
-                        },
-                        "operator": "-",
-                        "right": {
-                          "matcher": {
-                            "id": "byName",
-                            "options": "arc__up"
-                          }
-                        }
-                      }
-                    },
-                    "filter": {
-                      "id": "byRefId",
-                      "options": "N"
-                    }
-                  }
-                },
-                {
-                  "kind": "Transformation",
-                  "group": "calculateField",
-                  "spec": {
-                    "options": {
-                      "mode": "index",
-                      "alias": "id",
-                      "index": {
-                        "asPercentile": false
-                      }
-                    },
-                    "filter": {
-                      "id": "byRefId",
-                      "options": "E"
-                    }
-                  }
-                },
-                {
-                  "kind": "Transformation",
-                  "group": "convertFieldType",
-                  "spec": {
-                    "options": {
-                      "conversions": [
-                        {
-                          "targetField": "id",
-                          "destinationType": "string"
-                        }
-                      ]
-                    },
-                    "filter": {
-                      "id": "byRefId",
-                      "options": "E"
-                    }
-                  }
-                },
-                {
-                  "kind": "Transformation",
-                  "group": "organize",
-                  "spec": {
-                    "options": {
-                      "excludeByName": {
-                        "Time": true,
-                        "__name__": true,
-                        "instance": true,
                         "job": true,
-                        "model": true
+                        "zone": true,
+                        "peer_zone": true,
+                        "model": true,
+                        "Value #N": true
                       },
                       "renameByName": {
-                        "zone": "source",
-                        "peer_zone": "target",
                         "Value #E": "mainstat"
                       }
-                    },
-                    "filter": {
-                      "id": "byRefId",
-                      "options": "E"
                     }
                   }
                 }
@@ -1095,38 +1009,7 @@
             "spec": {
               "fieldConfig": {
                 "defaults": {},
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "arc__up"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "green"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "arc__down"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "red"
-                        }
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               },
               "options": {
                 "nodes": {
@@ -1334,6 +1217,20 @@
               "transformations": [
                 {
                   "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true,
+                        "__name__": true,
+                        "instance": true,
+                        "job": true
+                      }
+                    }
+                  }
+                },
+                {
+                  "kind": "Transformation",
                   "group": "merge",
                   "spec": {
                     "options": {}
@@ -1344,12 +1241,6 @@
                   "group": "organize",
                   "spec": {
                     "options": {
-                      "excludeByName": {
-                        "Time": true,
-                        "__name__": true,
-                        "instance": true,
-                        "job": true
-                      },
                       "indexByName": {
                         "zone": 0,
                         "peer_zone": 1,
@@ -1560,6 +1451,17 @@
               "transformations": [
                 {
                   "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true
+                      }
+                    }
+                  }
+                },
+                {
+                  "kind": "Transformation",
                   "group": "merge",
                   "spec": {
                     "options": {}
@@ -1570,9 +1472,6 @@
                   "group": "organize",
                   "spec": {
                     "options": {
-                      "excludeByName": {
-                        "Time": true
-                      },
                       "indexByName": {
                         "zone": 0,
                         "Value #ETH": 1,
@@ -1771,8 +1670,8 @@
         "kind": "Panel",
         "spec": {
           "id": 17,
-          "title": "Busy flags",
-          "description": "Radio busy-client flags as reported by the player (AUDIO_OUT, NO_PRIMARY, ...). A row is present while the flag is set.",
+          "title": "Playing (AUDIO_OUT)",
+          "description": "Set while the player outputs audio. The other busy flags (NO_PRIMARY, LOCAL_SONOSNET, ...) are static per zone and shown in the zone rows.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1789,10 +1688,10 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sonos_busy_state",
+                        "expr": "sonos_busy_state{state=\"AUDIO_OUT\"}",
                         "range": true,
                         "instant": false,
-                        "legendFormat": "{{zone}} · {{state}}"
+                        "legendFormat": "{{zone}}"
                       }
                     }
                   }
@@ -1813,8 +1712,21 @@
                     "fillOpacity": 70,
                     "lineWidth": 0
                   },
+                  "mappings": [
+                    {
+                      "type": "value",
+                      "options": {
+                        "1": {
+                          "text": "playing",
+                          "color": "green",
+                          "index": 0
+                        }
+                      }
+                    }
+                  ],
                   "color": {
-                    "mode": "palette-classic"
+                    "mode": "fixed",
+                    "fixedColor": "green"
                   }
                 },
                 "overrides": []
@@ -2039,6 +1951,17 @@
               "transformations": [
                 {
                   "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true
+                      }
+                    }
+                  }
+                },
+                {
+                  "kind": "Transformation",
                   "group": "merge",
                   "spec": {
                     "options": {}
@@ -2049,9 +1972,6 @@
                   "group": "organize",
                   "spec": {
                     "options": {
-                      "excludeByName": {
-                        "Time": true
-                      },
                       "indexByName": {
                         "zone": 0,
                         "Value #CH": 1,
@@ -2067,8 +1987,8 @@
                         "Value #MHZ": "MHz",
                         "Value #HT": "HT channel",
                         "Value #HTAP": "HT AP",
-                        "Value #RX": "RX chains",
-                        "Value #TX": "TX chains"
+                        "Value #RX": "RX",
+                        "Value #TX": "TX"
                       }
                     }
                   }
