@@ -1090,7 +1090,7 @@
           },
           "vizConfig": {
             "kind": "VizConfig",
-            "group": "nodegraph",
+            "group": "nodeGraph",
             "version": "13.2.2",
             "spec": {
               "fieldConfig": {
