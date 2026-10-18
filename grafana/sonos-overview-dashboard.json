@@ -2140,7 +2140,7 @@
         "spec": {
           "id": 20,
           "title": "PHY error rate",
-          "description": "PHY errors per second. The player counter resets on its own, rate() handles that.",
+          "description": "PHY errors per second. The player counter resets on its own, rate() handles that. 15m window so it works with 5m scrapes.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2157,7 +2157,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(sonos_phy_errors[5m])",
+                        "expr": "rate(sonos_phy_errors[15m])",
                         "range": true,
                         "instant": false,
                         "legendFormat": "{{zone}}"
@@ -2227,7 +2227,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(sonos_rx_bytes{interface=\"br0\"}[5m])",
+                        "expr": "rate(sonos_rx_bytes{interface=\"br0\"}[15m])",
                         "range": true,
                         "instant": false,
                         "legendFormat": "RX {{zone}}"
@@ -2246,7 +2246,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "-rate(sonos_tx_bytes{interface=\"br0\"}[5m])",
+                        "expr": "-rate(sonos_tx_bytes{interface=\"br0\"}[15m])",
                         "range": true,
                         "instant": false,
                         "legendFormat": "TX {{zone}}"
@@ -2315,7 +2315,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (zone) (rate(sonos_rx_dropped[5m]) + rate(sonos_tx_dropped[5m]))",
+                        "expr": "sum by (zone) (rate(sonos_rx_dropped[15m]) + rate(sonos_tx_dropped[15m]))",
                         "range": true,
                         "instant": false,
                         "legendFormat": "{{zone}}"
@@ -2385,7 +2385,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (zone) (rate(sonos_rx_errors[5m]) + rate(sonos_tx_errors[5m]))",
+                        "expr": "sum by (zone) (rate(sonos_rx_errors[15m]) + rate(sonos_tx_errors[15m]))",
                         "range": true,
                         "instant": false,
                         "legendFormat": "{{zone}}"
@@ -2925,7 +2925,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(sonos_rx_bytes{zone=\"$zone\"}[5m]) > 0",
+                        "expr": "rate(sonos_rx_bytes{zone=\"$zone\"}[15m]) > 0",
                         "range": true,
                         "instant": false,
                         "legendFormat": "RX {{interface}}"
@@ -2944,7 +2944,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "-rate(sonos_tx_bytes{zone=\"$zone\"}[5m]) < 0",
+                        "expr": "-rate(sonos_tx_bytes{zone=\"$zone\"}[15m]) < 0",
                         "range": true,
                         "instant": false,
                         "legendFormat": "TX {{interface}}"
@@ -3192,7 +3192,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(sonos_phy_errors{zone=\"$zone\"}[5m])",
+                        "expr": "rate(sonos_phy_errors{zone=\"$zone\"}[15m])",
                         "range": true,
                         "instant": false,
                         "legendFormat": "{{zone}}"
