@@ -1599,6 +1599,107 @@
         "kind": "Panel",
         "spec": {
           "id": 16,
+          "title": "Link quality matrix (avg of FROM/TO)",
+          "description": "One row per mesh link, colour is the average of FROM and TO quality over time. Red below 40, green above 55.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "refId": "A",
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sonos_link_quality_from + sonos_link_quality_to) / 2",
+                        "range": true,
+                        "instant": false,
+                        "legendFormat": "{{zone}} → {{peer_zone}}"
+                      }
+                    }
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "heatmap",
+            "version": "13.2.2",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "scaleDistribution": {
+                      "type": "linear"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "calculate": false,
+                "cellGap": 1,
+                "showValue": "auto",
+                "color": {
+                  "mode": "scheme",
+                  "scheme": "RdYlGn",
+                  "reverse": true,
+                  "scale": "exponential",
+                  "exponent": 0.5,
+                  "steps": 64,
+                  "fill": "dark-orange",
+                  "min": 0,
+                  "max": 100
+                },
+                "exemplars": {
+                  "color": "rgba(255,0,255,0.7)"
+                },
+                "filterValues": {
+                  "le": 1e-09
+                },
+                "legend": {
+                  "placement": "bottom",
+                  "show": true
+                },
+                "rowsFrame": {
+                  "layout": "auto"
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "showColorScale": false,
+                  "yHistogram": false
+                },
+                "xAxis": {
+                  "show": true
+                },
+                "yAxis": {
+                  "axisPlacement": "left",
+                  "reverse": false,
+                  "show": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "panel-17": {
+        "kind": "Panel",
+        "spec": {
+          "id": 17,
           "title": "WiFi mode",
           "description": "One row per zone and mode. A zone that changes mode shows up as two rows.",
           "links": [],
@@ -1666,10 +1767,10 @@
           }
         }
       },
-      "panel-17": {
+      "panel-18": {
         "kind": "Panel",
         "spec": {
-          "id": 17,
+          "id": 18,
           "title": "Playing (AUDIO_OUT)",
           "description": "Set while the player outputs audio. The other busy flags (NO_PRIMARY, LOCAL_SONOSNET, ...) are static per zone and shown in the zone rows.",
           "links": [],
@@ -1750,10 +1851,10 @@
           }
         }
       },
-      "panel-18": {
+      "panel-19": {
         "kind": "Panel",
         "spec": {
-          "id": 18,
+          "id": 19,
           "title": "IEEE channel",
           "description": "Channel changes over time",
           "links": [],
@@ -1821,10 +1922,10 @@
           }
         }
       },
-      "panel-19": {
+      "panel-20": {
         "kind": "Panel",
         "spec": {
-          "id": 19,
+          "id": 20,
           "title": "Radio details",
           "description": "",
           "links": [],
@@ -2055,10 +2156,10 @@
           }
         }
       },
-      "panel-20": {
+      "panel-21": {
         "kind": "Panel",
         "spec": {
-          "id": 20,
+          "id": 21,
           "title": "PHY error rate",
           "description": "PHY errors per second. The player counter resets on its own, rate() handles that. 15m window so it works with 5m scrapes.",
           "links": [],
@@ -2125,10 +2226,10 @@
           }
         }
       },
-      "panel-21": {
+      "panel-22": {
         "kind": "Panel",
         "spec": {
-          "id": 21,
+          "id": 22,
           "title": "Bandwidth br0 (RX above, TX below zero)",
           "description": "",
           "links": [],
@@ -2213,10 +2314,10 @@
           }
         }
       },
-      "panel-22": {
+      "panel-23": {
         "kind": "Panel",
         "spec": {
-          "id": 22,
+          "id": 23,
           "title": "Drops",
           "description": "",
           "links": [],
@@ -2283,10 +2384,10 @@
           }
         }
       },
-      "panel-23": {
+      "panel-24": {
         "kind": "Panel",
         "spec": {
-          "id": 23,
+          "id": 24,
           "title": "Errors",
           "description": "",
           "links": [],
@@ -2353,10 +2454,10 @@
           }
         }
       },
-      "panel-24": {
+      "panel-25": {
         "kind": "Panel",
         "spec": {
-          "id": 24,
+          "id": 25,
           "title": "Inventory",
           "description": "",
           "links": [],
@@ -2455,10 +2556,10 @@
           }
         }
       },
-      "panel-25": {
+      "panel-26": {
         "kind": "Panel",
         "spec": {
-          "id": 25,
+          "id": 26,
           "title": "Battery level",
           "description": "",
           "links": [],
@@ -2541,10 +2642,10 @@
           }
         }
       },
-      "panel-26": {
+      "panel-27": {
         "kind": "Panel",
         "spec": {
-          "id": 26,
+          "id": 27,
           "title": "Battery status",
           "description": "",
           "links": [],
@@ -2668,10 +2769,10 @@
           }
         }
       },
-      "panel-27": {
+      "panel-28": {
         "kind": "Panel",
         "spec": {
-          "id": 27,
+          "id": 28,
           "title": "Noise floor",
           "description": "Average over RF chains. Only older Atheros based players (Play:1, Play:3, Play:5 gen 1, ...) report this.",
           "links": [],
@@ -2737,10 +2838,10 @@
           }
         }
       },
-      "panel-28": {
+      "panel-29": {
         "kind": "Panel",
         "spec": {
-          "id": 28,
+          "id": 29,
           "title": "OFDM ANI level",
           "description": "Adaptive noise immunity level of the Atheros radio. Higher means the radio is fighting interference. Only older players report this.",
           "links": [],
@@ -2823,10 +2924,10 @@
           }
         }
       },
-      "panel-29": {
+      "panel-30": {
         "kind": "Panel",
         "spec": {
-          "id": 29,
+          "id": 30,
           "title": "Bandwidth per interface",
           "description": "",
           "links": [],
@@ -2911,10 +3012,10 @@
           }
         }
       },
-      "panel-30": {
+      "panel-31": {
         "kind": "Panel",
         "spec": {
-          "id": 30,
+          "id": 31,
           "title": "Links from this zone",
           "description": "Solid: FROM quality, dashed: TO quality",
           "links": [],
@@ -3019,10 +3120,10 @@
           }
         }
       },
-      "panel-31": {
+      "panel-32": {
         "kind": "Panel",
         "spec": {
-          "id": 31,
+          "id": 32,
           "title": "Busy flags",
           "description": "",
           "links": [],
@@ -3090,10 +3191,10 @@
           }
         }
       },
-      "panel-32": {
+      "panel-33": {
         "kind": "Panel",
         "spec": {
-          "id": 32,
+          "id": 33,
           "title": "PHY error rate",
           "description": "",
           "links": [],
@@ -3160,10 +3261,10 @@
           }
         }
       },
-      "panel-33": {
+      "panel-34": {
         "kind": "Panel",
         "spec": {
-          "id": 33,
+          "id": 34,
           "title": "Uptime",
           "description": "",
           "links": [],
@@ -3239,10 +3340,10 @@
           }
         }
       },
-      "panel-34": {
+      "panel-35": {
         "kind": "Panel",
         "spec": {
-          "id": 34,
+          "id": 35,
           "title": "Latency",
           "description": "",
           "links": [],
@@ -3322,10 +3423,10 @@
           }
         }
       },
-      "panel-35": {
+      "panel-36": {
         "kind": "Panel",
         "spec": {
-          "id": 35,
+          "id": 36,
           "title": "Loss",
           "description": "",
           "links": [],
@@ -3405,10 +3506,10 @@
           }
         }
       },
-      "panel-36": {
+      "panel-37": {
         "kind": "Panel",
         "spec": {
-          "id": 36,
+          "id": 37,
           "title": "Channel",
           "description": "",
           "links": [],
@@ -3704,6 +3805,19 @@
                           "name": "panel-15"
                         }
                       }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 25,
+                        "width": 24,
+                        "height": 9,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-16"
+                        }
+                      }
                     }
                   ]
                 }
@@ -3728,7 +3842,7 @@
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-16"
+                          "name": "panel-17"
                         }
                       }
                     },
@@ -3741,19 +3855,6 @@
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-17"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
-                        "x": 0,
-                        "y": 8,
-                        "width": 12,
-                        "height": 8,
-                        "element": {
-                          "kind": "ElementReference",
                           "name": "panel-18"
                         }
                       }
@@ -3761,7 +3862,7 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 12,
+                        "x": 0,
                         "y": 8,
                         "width": 12,
                         "height": 8,
@@ -3774,13 +3875,26 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 8,
+                        "width": 12,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-20"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
                         "x": 0,
                         "y": 16,
                         "width": 24,
                         "height": 7,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-20"
+                          "name": "panel-21"
                         }
                       }
                     }
@@ -3807,7 +3921,7 @@
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-21"
+                          "name": "panel-22"
                         }
                       }
                     },
@@ -3820,7 +3934,7 @@
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-22"
+                          "name": "panel-23"
                         }
                       }
                     },
@@ -3833,7 +3947,7 @@
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-23"
+                          "name": "panel-24"
                         }
                       }
                     },
@@ -3846,7 +3960,7 @@
                         "height": 9,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-24"
+                          "name": "panel-25"
                         }
                       }
                     }
@@ -3873,7 +3987,7 @@
                         "height": 7,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-25"
+                          "name": "panel-26"
                         }
                       }
                     },
@@ -3886,7 +4000,7 @@
                         "height": 7,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-26"
+                          "name": "panel-27"
                         }
                       }
                     }
@@ -3928,7 +4042,7 @@
                         "height": 7,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-27"
+                          "name": "panel-28"
                         }
                       }
                     },
@@ -3941,7 +4055,7 @@
                         "height": 7,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-28"
+                          "name": "panel-29"
                         }
                       }
                     }
@@ -3983,7 +4097,7 @@
                         "height": 4,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-33"
+                          "name": "panel-34"
                         }
                       }
                     },
@@ -3996,7 +4110,7 @@
                         "height": 4,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-34"
+                          "name": "panel-35"
                         }
                       }
                     },
@@ -4009,7 +4123,7 @@
                         "height": 4,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-35"
+                          "name": "panel-36"
                         }
                       }
                     },
@@ -4022,7 +4136,7 @@
                         "height": 4,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-36"
+                          "name": "panel-37"
                         }
                       }
                     },
@@ -4035,7 +4149,7 @@
                         "height": 4,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-31"
+                          "name": "panel-32"
                         }
                       }
                     },
@@ -4043,19 +4157,6 @@
                       "kind": "GridLayoutItem",
                       "spec": {
                         "x": 0,
-                        "y": 4,
-                        "width": 12,
-                        "height": 8,
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-29"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
-                        "x": 12,
                         "y": 4,
                         "width": 12,
                         "height": 8,
@@ -4068,13 +4169,26 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 4,
+                        "width": 12,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-31"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
                         "x": 0,
                         "y": 12,
                         "width": 24,
                         "height": 5,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-32"
+                          "name": "panel-33"
                         }
                       }
                     }
