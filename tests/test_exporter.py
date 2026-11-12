@@ -212,3 +212,27 @@ class TestIcmpHelpers(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPhyErrorCounter(ExporterFixtureTest):
+    """The player resets its PHY counter on every read; the exporter accumulates reads."""
+
+    fixture = "review.xml"
+
+    def total(self, zone):
+        for s in samples("sonos_radio_phy_errors"):
+            if s.name == "sonos_radio_phy_errors_total" and s.labels.get("zone") == zone:
+                return s.value
+        return None
+
+    def test_first_read_not_counted_later_reads_accumulate(self):
+        zone = "Stue (LF,RF)"
+        self.assertEqual(self.total(zone), 0.0)
+        with patch("sonos_exporter.requests.get") as get:
+            get.return_value = MagicMock(
+                content=load_fixture(self.fixture), raise_for_status=MagicMock()
+            )
+            self.exporter.scrape_once()
+            self.exporter.scrape_once()
+        self.assertEqual(self.total(zone), 2 * 19342.0)
+        self.assertEqual(sample_value("sonos_phy_errors", zone=zone), 19342.0)
