@@ -31,6 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import requests
 import xml.etree.ElementTree as ET
 from prometheus_client import (
+    Counter,
     Gauge,
     REGISTRY,
     generate_latest,
@@ -59,6 +60,9 @@ class SonosExporter:
         # Track mutable label sets so stale entries can be removed from the registry
         self._known_busy_states = {}  # zone -> set of state label values
         self._known_wifi_modes = {}   # zone -> mode_string label value
+        # Zones whose PHY counter has been read once. The first read covers an
+        # unknown span (since whatever read it last), so it isn't counted.
+        self._phy_seen = set()
 
         # --- Core interface counters ---
         self.rx_bytes = Gauge("sonos_rx_bytes", "Received bytes", ["zone", "interface"])
@@ -71,7 +75,15 @@ class SonosExporter:
         self.tx_dropped = Gauge("sonos_tx_dropped", "Transmit drops", ["zone", "interface"])
 
         # --- Radio / PHY ---
-        self.phy_errors = Gauge("sonos_phy_errors", "PHY errors", ["zone"])
+        self.phy_errors = Gauge(
+            "sonos_phy_errors", "PHY errors since the previous read (each read resets the player's counter)", ["zone"]
+        )
+        # The player's counter resets on every read, so the gauge above is a
+        # per-interval count that rate() can't use. Accumulate the reads into
+        # a real counter: rate(sonos_radio_phy_errors_total[...]) = errors/s.
+        self.phy_errors_total = Counter(
+            "sonos_radio_phy_errors", "PHY errors, accumulated across reads", ["zone"]
+        )
         self.noise_floor = Gauge("sonos_noise_floor_dbm", "Noise floor", ["zone"])
         self.ofdm_ani = Gauge("sonos_ofdm_ani_level", "OFDM ANI", ["zone"])
         self.operating_channel = Gauge("sonos_operating_channel", "Channel", ["zone"])
@@ -298,7 +310,13 @@ class SonosExporter:
         if ieee:
             self.ieee_channel.labels(zone).set(float(ieee.group(1)))
         if phy:
-            self.phy_errors.labels(zone).set(float(phy.group(1)))
+            count = float(phy.group(1))
+            self.phy_errors.labels(zone).set(count)
+            total = self.phy_errors_total.labels(zone)
+            if zone in self._phy_seen:
+                total.inc(count)
+            else:
+                self._phy_seen.add(zone)
         # Newer (MediaTek based) players report 0 dBm on every chain, meaning
         # "not available" rather than a real noise floor; skip those.
         if noise and any(noise):

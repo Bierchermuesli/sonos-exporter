@@ -66,7 +66,8 @@ All metrics carry a `zone` label. The most useful ones:
 | `sonos_idle_state`, `sonos_busy_state` | state | Radio idle/busy flags |
 | `sonos_operating_channel`, `sonos_ieee_channel`, `sonos_ht_channel`, `sonos_ht_ap_mode` | | Channel details |
 | `sonos_rf_chains` | direction | RX/TX chain count |
-| `sonos_phy_errors` | | PHY error counter, resets on its own |
+| `sonos_phy_errors` | | PHY errors since the previous read (the player resets the count on every read) |
+| `sonos_radio_phy_errors_total` | | Counter accumulating those reads; `rate()` gives PHY errors per second |
 | `sonos_noise_floor_dbm`, `sonos_ofdm_ani_level` | | Radio quality, only reported by older Atheros based players |
 | `sonos_link_connection` | peer_zone, model, stp, ... | One entry per SonosNet mesh link |
 | `sonos_link_quality_from`, `sonos_link_quality_to` | peer_zone, model | Link quality per direction |
